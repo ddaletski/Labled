@@ -3,5 +3,8 @@
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>qml/ImageDraw.qml</file>
+        <file>qml/FileChooseDialog.qml</file>
+        <file>qml/LabelChooseDialog.qml</file>
+        <file>qml/RectBoxItem.qml</file>
     </qresource>
 </RCC>

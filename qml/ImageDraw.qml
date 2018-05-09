@@ -5,6 +5,7 @@ Item {
     property url src: ""
     property bool isSelection: false
     property var rects: []
+    property var lastRect: rects[rects.length-1]
 
     signal rectAdded(var rect)
 
@@ -16,42 +17,7 @@ Item {
         Repeater {
             id: drawnRects
             model: root.rects
-            Item {
-                Rectangle {
-                    id: drawnRect
-                    border.color: modelData.borderColor
-                    color: index == root.rects.length -1 ? modelData.fillColor : "transparent"
-                    x: modelData.x
-                    y: modelData.y
-                    width: modelData.width
-                    height: modelData.height
-                }
-                Rectangle {
-                    anchors {
-                        fill: drawnLabel
-                        leftMargin: -drawnLabel.anchors.leftMargin
-                        rightMargin: -drawnLabel.anchors.rightMargin
-                        topMargin: -1
-                        bottomMargin: -1
-                    }
-                    visible: drawnLabel.text != ''
-
-                    color: drawnRect.color
-                    border.color: drawnRect.border.color
-                }
-
-                Text {
-                    id: drawnLabel
-                    anchors {
-                        bottom: if (drawnRect.y > height) drawnRect.top
-                        top: if (drawnRect.y <= height) drawnRect.bottom
-                        left: drawnRect.left
-                        leftMargin: 3
-                        rightMargin: 3
-                    }
-                    text: modelData.label
-                }
-            }
+            RectBoxItem { }
         }
     }
 
@@ -104,15 +70,20 @@ Item {
         }
 
         onPressed: {
+            root.focus = true
+
             if(root.isSelection) {
                 create = true
                 var r = rectItem(mouse.x, mouse.y, 0, 0, '', 'red', Qt.rgba(0.05, 0.05, 0.5, 0.2))
                 root.rects.push(r)
             } else {
                 resizeInfo = root.onEdge(mouse.x, mouse.y)
-
                 dragInfo = root.inRect(mouse.x, mouse.y)
-                if (dragInfo.rectIdx >= 0) {
+
+                if (resizeInfo.rectIdx >= 0) {
+//                    moveRectToBack(resizeInfo.rectIdx) // resized rect is drawn on top of the others
+//                    resizeInfo.rectIdx = root.rects.length - 1
+                } else if (dragInfo.rectIdx >= 0) {
                     moveRectToBack(dragInfo.rectIdx) // dragged rect is drawn on top of the others
                     dragInfo.rectIdx = root.rects.length - 1
                 }
@@ -124,7 +95,12 @@ Item {
             if(root.isSelection) {
                 create = false
                 isSelection = false
-                root.rectAdded(root.rects[root.rects.length-1])
+                var newRect = root.rects[root.rects.length-1]
+
+                if (newRect.width * newRect.height < 4)
+                    root.rects.pop()
+                else
+                    root.rectAdded(newRect)
             } else {
                 resizeInfo.rectIdx = -1
                 dragInfo.rectIdx = -1
@@ -221,15 +197,15 @@ Item {
                 var dinfo = inRect(X, Y)
                 var rinfo = onEdge(X, Y)
 
-                if (dinfo.rectIdx >= 0) {
-                    cursorShape = Qt.DragMoveCursor
-                } else if (rinfo.rectIdx >= 0) {
+                if (rinfo.rectIdx >= 0) {
                     if (rinfo.hor && rinfo.ver)
                         cursorShape = Qt.SizeAllCursor
                     else if (rinfo.hor)
                         cursorShape = Qt.SizeVerCursor
                     else
                         cursorShape = Qt.SizeHorCursor
+                } else if (dinfo.rectIdx >= 0) {
+                    cursorShape = Qt.DragMoveCursor
                 } else {
                     cursorShape = Qt.ArrowCursor
                 }
@@ -273,13 +249,23 @@ Item {
        }
    }
 
-
    function moveRectToBack(idx) {
+       if(rects.length <= 1)
+           return
+
        var rect = rects[idx]
        for (var i = idx; i < rects.length-1; ++i) {
            rects[i] = rects[i+1]
        }
        rects[rects.length-1] = rect
+   }
+
+
+   function shiftRects() {
+       if(rects.length <= 1)
+           return
+
+       rects.unshift(rects.pop())
    }
 
 
@@ -321,7 +307,17 @@ Item {
        rects = rects
    }
 
+   function updateLabel(label) {
+       if (rects.length)
+           rects[rects.length - 1].label = label
+       updateRects()
+   }
+
    function bounded(val, min, max) {
        return Math.max(Math.min(val, max), min)
+   }
+
+   function deleteActiveRect() {
+       rects.pop()
    }
 }
