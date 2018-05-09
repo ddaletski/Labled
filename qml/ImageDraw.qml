@@ -20,7 +20,7 @@ Item {
                 Rectangle {
                     id: drawnRect
                     border.color: modelData.borderColor
-                    color: modelData.fillColor
+                    color: index == root.rects.length -1 ? modelData.fillColor : "transparent"
                     x: modelData.x
                     y: modelData.y
                     width: modelData.width
@@ -117,6 +117,7 @@ Item {
                     dragInfo.rectIdx = root.rects.length - 1
                 }
             }
+            update(mouse)
         }
 
         onReleased: {
@@ -127,11 +128,14 @@ Item {
             } else {
                 resizeInfo.rectIdx = -1
                 dragInfo.rectIdx = -1
-                console.log("stop drag")
             }
         }
 
         onPositionChanged: {
+            update(mouse)
+        }
+
+        function update(mouse) {
             var X = bounded(mouse.x, 0, width)
             var Y = bounded(mouse.y, 0, height)
 
@@ -146,24 +150,19 @@ Item {
                 if (v == -1) {
                     rect.width -= (X - rect.x)
                     rect.x = X
-                    console.log("left")
                 } else if (v == 1) {
                     rect.width = X - rect.x
-                    console.log("right")
                     console.log(rect.width)
                 }
 
                 if (h == -1) {
                     rect.height -= (Y - rect.y)
                     rect.y = Y
-                    console.log("top")
                 } else if (h == 1) {
                     rect.height = Y - rect.y
-                    console.log("bottom")
                     console.log(rect.height)
                 }
 
-                console.log(rect.width, rect.height)
                 if (rect.width < 0) {
                     rect.x += rect.width
                     rect.width *= -1
@@ -180,7 +179,6 @@ Item {
 
             } else if (dragInfo.rectIdx >= 0) {
 
-                console.log("drag move")
                 var idx = dragInfo.rectIdx
                 var rect = root.rects[dragInfo.rectIdx]
 
