@@ -1,5 +1,11 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtDebug>
+#include <QUrl>
+
+
+#include "imageloader.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +17,17 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
+
+    QObject* rootObject = engine.rootObjects()[0];
+
+
+    ImagesLoader loader;
+    QObject::connect(rootObject, SIGNAL(sigLoadImages(QUrl, QUrl)), &loader, SLOT(loadImages(QUrl, QUrl)));
+
+    QObject::connect(rootObject, SIGNAL(sigNextImage()), &loader, SLOT(nextImage()));
+    QObject::connect(&loader, SIGNAL(nextImageLoaded(QVariant, QVariant)), rootObject, SLOT(nextImageLoaded(QVariant, QVariant)));
+
+    QObject::connect(rootObject, SIGNAL(sigSaveImage(QVariant)),&loader, SLOT(saveImage(QVariant)));
 
     return app.exec();
 }

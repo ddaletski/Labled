@@ -26,7 +26,8 @@ Dialog {
 
             KeyNavigation.tab: textInput
 
-            ListView {
+            ListView { // list of labels to choose
+
                 id: labelsListView
                 anchors {
                     fill: parent
@@ -44,16 +45,16 @@ Dialog {
 
                     Text {
                         anchors.fill: parent
-                        text: "" + (index < 9 ? (index+1) + ": " : "") + modelData
+                        text: "" + (index < 9 ? (index+1) + ": " : "") + modelData.name
                     }
                 }
             }
 
-            Keys.onPressed: {
+            Keys.onPressed: { // quick choice shortcuts
                 if(event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
                     var idx = event.key - Qt.Key_1
                     if(root.labelsList.length > idx) {
-                        label = labelsList[idx]
+                        label = labelsList[idx].name
                     }
                 }
             }
@@ -65,7 +66,7 @@ Dialog {
             visible: root.labelsList.length
         }
 
-        TextField {
+        TextField { // new label field
             id: textInput
             Layout.fillWidth: true
 
@@ -77,18 +78,5 @@ Dialog {
 
     onVisibleChanged: {
         listViewRect.focus = true
-    }
-
-    function addLabel(label) {
-        for(var i in labelsList) {
-            if(label === labelsList[i])
-                return
-        }
-        labelsList.push(label)
-        updateLabels()
-    }
-
-    function updateLabels() {
-        labelsList = labelsList
     }
 }

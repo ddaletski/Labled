@@ -6,5 +6,7 @@
         <file>qml/FileChooseDialog.qml</file>
         <file>qml/LabelChooseDialog.qml</file>
         <file>qml/RectBoxItem.qml</file>
+        <file>qml/LabelsMenu.qml</file>
+        <file>qml/ColorChooseDialog.qml</file>
     </qresource>
 </RCC>

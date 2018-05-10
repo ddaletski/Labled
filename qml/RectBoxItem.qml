@@ -1,14 +1,24 @@
 import QtQuick 2.4
 
 Item {
+    id: root
+
+    property alias showLabel: drawnLabel.visible
+    property alias label: drawnLabel.text
+    property color borderColor: "red"
+    property color fillColor: "transparent"
+    property color textColor: "black"
+
+    property int borderWidth: 1
+    property alias _width: drawnRect.width
+    property alias _height: drawnRect.height
+    property alias _x: drawnRect.x
+    property alias _y: drawnRect.y
+
     Rectangle {
         id: drawnRect
-        border.color: modelData.borderColor
-        color: index == root.rects.length -1 ? modelData.fillColor : "transparent"
-        x: modelData.x
-        y: modelData.y
-        width: modelData.width
-        height: modelData.height
+        border.color: borderColor
+        color: fillColor
     }
 
     Rectangle {
@@ -23,6 +33,7 @@ Item {
 
         color: drawnRect.color
         border.color: drawnRect.border.color
+        border.width: root.borderWidth
     }
 
     Text {
@@ -34,6 +45,7 @@ Item {
             leftMargin: 3
             rightMargin: 3
         }
-        text: modelData.label
+        color: root.textColor
+        font.bold: true
     }
 }

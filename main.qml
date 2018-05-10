@@ -7,36 +7,42 @@ import "qml"
 ApplicationWindow {
     id: root
     visible: true
-    width: 640
-    height: 480
+    width: 1024
+    height: 720
     title: qsTr("Lable")
 
     property string inputDir: ""
     property string outputDir: ""
-    property var images
+    property var labelsList: [{name: 'a', color: 'red'}, {name: 'b', color: 'blue'}, {name: 'c', color: 'black'}]
     property url currentImage
 
-    signal sigSaveLabels(var rects, string outdir)
-    signal sigLoadImages(string indir, string outdir)
 
-    function saveRects(rects) {
-        sigSaveLabels(rects, outdir, currentImage)
-        console.log(currentImage)
+    /***************** signals ***************/
+
+
+    signal sigNextImage()
+    signal sigLoadImages(url imagesDir, url labelsDir)
+    signal sigSaveImage(var rects)
+
+
+    /***************** slots ***************/
+
+    function nextImageLoaded(imageUrl, boxes)  {
+        currentImage = imageUrl
+
+        var xs = imageArea.xscale
+        var ys = imageArea.yscale
+
+        for(var i in boxes) {
+            var box = boxes[i]
+            imageArea.rects.push( imageArea.rectItem(box.x * xs, box.y * ys, box.width * xs, box.height * ys, addLabel(box.label)) )
+        }
+
+        imageArea.updateRects()
     }
 
-    function loadImages() {
-        sigLoadImages(inputDir, outputDir)
-        console.log(inputDir)
-    }
+    ///////////////////////////////////////////
 
-    function imagesLoaded(images) {
-        root.images = images
-    }
-
-    function nextImage() {
-        var pair = images.pop()
-        currentImage = pair['img']
-    }
 
     FileChooseDialog {
         id: indirDialog
@@ -44,7 +50,7 @@ ApplicationWindow {
         onAccepted: {
             mainItem.focus = true
             inputDir = fileUrl
-            root.loadImages()
+            root.sigLoadImages(root.inputDir, root.outputDir)
         }
 
         onRejected: {
@@ -58,7 +64,7 @@ ApplicationWindow {
         onAccepted: {
             mainItem.focus = true
             inputDir = fileUrl
-            root.loadImages()
+            root.sigLoadImages(root.inputDir, root.outputDir)
         }
 
         onRejected: {
@@ -66,20 +72,37 @@ ApplicationWindow {
         }
     }
 
+
     LabelChooseDialog {
         id: labelDialog
-        labelsList: [1, 2, 3, 4, 5, 6, 7, 8]
+        labelsList: root.labelsList
 
         onAccepted: {
             if(label != '') {
-                imageArea.updateLabel(label)
-                addLabel(label)
+                var labelIdx = addLabel(label)
+                imageArea.updateLabel(labelIdx)
             }
             mainItem.focus = true
         }
 
         onRejected: {
             mainItem.focus = true
+        }
+    }
+
+
+    ColorChooseDialog {
+        id: colorDialog
+
+        onAccepted: {
+            if(labelIndex >= 0) {
+                labelsList[labelIndex].color = color
+            }
+            root.updateLabels()
+        }
+
+        onRejected: {
+            labelIndex = -1
         }
     }
 
@@ -121,6 +144,7 @@ ApplicationWindow {
                 id: imageArea
 
                 src: root.currentImage
+                labelsList: root.labelsList
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -130,6 +154,18 @@ ApplicationWindow {
                     labelDialog.label = rect.label
                 }
             }
+
+            LabelsMenu {
+                id: labelsMenu
+                width: 100
+                Layout.fillHeight: true
+                model: root.labelsList
+
+                onSigChooseColor: {
+                    colorDialog.chooseColor(labelIndex)
+                }
+            }
+
         } // RowLayout
 
         Keys.onSpacePressed: {
@@ -158,10 +194,29 @@ ApplicationWindow {
                 }
                 break
             case Qt.Key_S:
-                root.saveRects(imageArea.rects)
+                sigSaveImage(imageArea.rects)
+                break
+            case Qt.Key_D:
+                sigNextImage()
+                break;
             }
         }
 
     } // mainItem
+
+
+    function addLabel(label) {
+        for(var i in labelsList) {
+            if(label == labelsList[i].name)
+                return i
+        }
+        labelsList.push({name: label, color: 'red'})
+        updateLabels()
+        return labelsList.length - 1
+    }
+
+    function updateLabels() {
+        labelsList = labelsList
+    }
 
 } // window

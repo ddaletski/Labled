@@ -1,11 +1,21 @@
-import QtQuick 2.0
+import QtQuick 2.7
 
 Item {
     id: root
     property url src: ""
-    property bool isSelection: false
+    property bool isSelection: false  // is selection in progress (new bar creation)
+
+    property bool showLabels: true
+    property int rectBorderWidth: 1
+    property bool invertColors: false
+
     property var rects: []
     property var lastRect: rects[rects.length-1]
+    property var labelsList: []
+
+
+    readonly property double xscale: img.width / img.sourceSize.width
+    readonly property double yscale: img.height / img.sourceSize.height
 
     signal rectAdded(var rect)
 
@@ -17,19 +27,41 @@ Item {
         Repeater {
             id: drawnRects
             model: root.rects
-            RectBoxItem { }
+
+            RectBoxItem { // object bounding box
+                showLabel: root.showLabels
+                _x: modelData.x
+                _y: modelData.y
+                _width: modelData.width
+                _height: modelData.height
+
+                label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
+                borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
+                borderWidth: root.rectBorderWidth
+                fillColor: {
+                    if(index == root.rects.length-1) {
+                        var alpha = img.invertColors ? 0.8 : 0.2
+                        Qt.rgba(0.1, 0.1, 0.1, alpha)
+                    } else {
+                        "transparent"
+                    }
+                }
+                textColor: img.invertColors ? "black" : "white"
+            }
         }
     }
 
     MouseArea {
         property bool create: false
 
+        // info about dragged box and offsets from box topLeft to drag point
         property var dragInfo: {
             rectIdx: -1
             shiftX: 0
             shiftY: 0
         }
 
+        // info about resized box and currently resized edge
         property var resizeInfo: {
             rectIdx: -1
             ver: 0  // -1 is left, 1 is right
@@ -39,7 +71,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
 
-        Rectangle {
+        Rectangle {  // horizontal line through pointer
             id: horLine
             visible: root.isSelection && !parent.create
 
@@ -54,7 +86,7 @@ Item {
             color: "black"
         }
 
-        Rectangle {
+        Rectangle { // vertical line through pointer
             id: verLine
             visible: root.isSelection && !parent.create
 
@@ -69,12 +101,36 @@ Item {
             color: "black"
         }
 
+
+        onWidthChanged: {
+            if(width < 10)
+                return
+
+            for (var i in rects) {
+                updateRectScaledComponent(rects[i])
+            }
+
+            updateRects()
+        }
+
+        onHeightChanged: {
+            if (height < 10)
+                return
+
+            for (var i in rects) {
+                updateRectScaledComponent(rects[i])
+            }
+
+            updateRects()
+        }
+
+
         onPressed: {
             root.focus = true
 
             if(root.isSelection) {
                 create = true
-                var r = rectItem(mouse.x, mouse.y, 0, 0, '', 'red', Qt.rgba(0.05, 0.05, 0.5, 0.2))
+                var r = rectItem(mouse.x, mouse.y, 0, 0, -1)
                 root.rects.push(r)
             } else {
                 resizeInfo = root.onEdge(mouse.x, mouse.y)
@@ -100,7 +156,7 @@ Item {
                 if (newRect.width * newRect.height < 4)
                     root.rects.pop()
                 else
-                    root.rectAdded(newRect)
+                    root.rectAdded(newRect)  // signal about new rect
             } else {
                 resizeInfo.rectIdx = -1
                 dragInfo.rectIdx = -1
@@ -110,6 +166,7 @@ Item {
         onPositionChanged: {
             update(mouse)
         }
+
 
         function update(mouse) {
             var X = bounded(mouse.x, 0, width)
@@ -128,7 +185,6 @@ Item {
                     rect.x = X
                 } else if (v == 1) {
                     rect.width = X - rect.x
-                    console.log(rect.width)
                 }
 
                 if (h == -1) {
@@ -136,7 +192,6 @@ Item {
                     rect.y = Y
                 } else if (h == 1) {
                     rect.height = Y - rect.y
-                    console.log(rect.height)
                 }
 
                 if (rect.width < 0) {
@@ -151,6 +206,7 @@ Item {
                     resizeInfo.hor *= -1
                 }
 
+                updateRectOrigComponent(rect)
                 updateRects()
 
             } else if (dragInfo.rectIdx >= 0) {
@@ -165,8 +221,8 @@ Item {
 
             } else if (create) {
 
-                var altX = false
-                var altY = false
+                var altX = false // pointer is left to selection start point
+                var altY = false //  pointer is above selection start point
                 var objRect = root.rects[root.rects.length-1]
 
                 if(objRect.baseX > mouse.x)
@@ -190,9 +246,10 @@ Item {
                     objRect.y = objRect.baseY
                 }
 
+                updateRectOrigComponent(objRect)
                 root.updateRects()
             } else {
-                // set cursor according to position
+                // set cursor according to available action
 
                 var dinfo = inRect(X, Y)
                 var rinfo = onEdge(X, Y)
@@ -213,7 +270,7 @@ Item {
         }
     }
 
-   function rectItem (x, y, width, height, label, borderColor, fillColor) {
+   function rectItem (x, y, width, height, label) {
        var rect = {
            x: x,
            y: y,
@@ -221,9 +278,11 @@ Item {
            baseY: y,
            width: width,
            height: height,
-           label: label,
-           borderColor: borderColor,
-           fillColor: fillColor
+           origX: x / xscale,
+           origY: y / yscale,
+           origWidth: width / xscale,
+           origHeight: height / yscale,
+           label: label
        }
        return rect
     }
@@ -319,5 +378,31 @@ Item {
 
    function deleteActiveRect() {
        rects.pop()
+   }
+
+   function scaleRect(rect, xscale, yscale) {
+       rect.x *= xscale
+       rect.y *= yscale
+       rect.width *= xscale
+       rect.height *= yscale
+       rect.baseX *= xscale
+       rect.baseY *= yscale
+       updateRectOrigComponent(rect)
+   }
+
+   function updateRectOrigComponent(rect) {
+       // updates original coordinates after rect resizing
+      rect.origX = rect.x / xscale
+      rect.origY = rect.y / yscale
+      rect.origWidth = rect.width / xscale
+      rect.origHeight = rect.height / yscale
+   }
+
+   function updateRectScaledComponent(rect) {
+       // updates visual (scaled to screen) coords after screen resizing
+       rect.x = rect.origX * xscale
+       rect.y = rect.origY * yscale
+       rect.width = rect.origWidth * xscale
+       rect.height = rect.origHeight * yscale
    }
 }
