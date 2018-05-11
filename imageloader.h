@@ -12,18 +12,22 @@ class ImagesLoader : public QObject {
     Q_OBJECT
 
 public slots:
-    void loadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
-    void nextImage(int step);
-    void saveImage(const QVariant& rects);
+    void LoadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
+    void NextImage(int step);
+    void SaveImage(const QVariant& rects);
 
 signals:
     void nextImageLoaded(QVariant, QVariant);
+    void imagesLoaded();
     void imageSaved();
 
 private:
     QUrl _currentImage;
     QVector<QPair<QUrl, QUrl>> _images;
     size_t _idx;
+
+    QVariantList LoadAnnotations();
+    void DumpAnnotations(const QVariantList& json);
 };
 
 

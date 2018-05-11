@@ -8,5 +8,8 @@
         <file>qml/RectBoxItem.qml</file>
         <file>qml/LabelsMenu.qml</file>
         <file>qml/ColorChooseDialog.qml</file>
+        <file>qml/ConfigurationMenu.qml</file>
+        <file>qml/UnsavedChangesDialog.qml</file>
+        <file>img/garbage_can.png</file>
     </qresource>
 </RCC>

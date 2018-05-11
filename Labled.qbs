@@ -6,6 +6,7 @@ Project {
     CppApplication {
         Depends { name: "Qt.core" }
         Depends { name: "Qt.quick" }
+        Depends { name: "Qt.xml" }
 
         // Additional import path used to resolve QML modules in Qt Creator's code model
         property pathList qmlImportPaths: []

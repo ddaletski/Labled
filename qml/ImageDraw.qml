@@ -7,17 +7,25 @@ Item {
 
     property bool showLabels: true
     property int rectBorderWidth: 1
-    property bool invertColors: false
+    property bool darkBoxes: false
 
     property var rects: []
     property var lastRect: rects[rects.length-1]
     property var labelsList: []
 
-
     readonly property double xscale: img.width / img.sourceSize.width
     readonly property double yscale: img.height / img.sourceSize.height
 
     signal rectAdded(var rect)
+    signal unsavedChanges()
+
+    onHeightChanged: {
+        recalculateRectsScaled()
+    }
+
+    onWidthChanged: {
+        recalculateRectsScaled()
+    }
 
     Image {
         id: img
@@ -39,14 +47,19 @@ Item {
                 borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
                 borderWidth: root.rectBorderWidth
                 fillColor: {
-                    var col = img.invertColors ? 1 : 0
+                    var col = darkBoxes ? 0 : 1
                     if(index == root.rects.length-1) {
                         Qt.rgba(col, col, col, 0.4)
                     } else {
-                        Qt.rgba(col, col, col, 0.3)
+                        Qt.rgba(col, col, col, 0.2)
                     }
                 }
-                textColor: img.invertColors ? "black" : "white"
+                textBgColor: {
+                    var col = darkBoxes ? 0 : 1
+                    Qt.rgba(col, col, col, 0.7)
+                }
+
+                textColor: darkBoxes ? "white" : "black"
             }
         }
     }
@@ -102,29 +115,6 @@ Item {
         }
 
 
-        onWidthChanged: {
-            if(width < 10)
-                return
-
-            for (var i in rects) {
-                updateRectScaledComponent(rects[i])
-            }
-
-            updateRects()
-        }
-
-        onHeightChanged: {
-            if (height < 10)
-                return
-
-            for (var i in rects) {
-                updateRectScaledComponent(rects[i])
-            }
-
-            updateRects()
-        }
-
-
         onPressed: {
             root.focus = true
 
@@ -155,8 +145,10 @@ Item {
 
                 if (newRect.width * newRect.height < 4)
                     root.rects.pop()
-                else
+                else {
                     root.rectAdded(newRect)  // signal about new rect
+                    unsavedChanges()
+                }
             } else {
                 resizeInfo.rectIdx = -1
                 dragInfo.rectIdx = -1
@@ -206,9 +198,8 @@ Item {
                     resizeInfo.hor *= -1
                 }
 
-                updateRectOrigComponent(rect)
-                updateRects()
-
+                recalculateRectsOriginal()
+                unsavedChanges()
             } else if (dragInfo.rectIdx >= 0) {
 
                 var idx = dragInfo.rectIdx
@@ -217,8 +208,8 @@ Item {
                 rect.x = bounded(X - dragInfo.shiftX, 0, width-rect.width)
                 rect.y = bounded(Y - dragInfo.shiftY, 0, height-rect.height)
 
-                root.updateRects()
-
+                recalculateRectsOriginal()
+                unsavedChanges()
             } else if (create) {
 
                 var altX = false // pointer is left to selection start point
@@ -246,8 +237,8 @@ Item {
                     objRect.y = objRect.baseY
                 }
 
-                updateRectOrigComponent(objRect)
-                root.updateRects()
+                recalculateRectsOriginal()
+                unsavedChanges()
             } else {
                 // set cursor according to available action
 
@@ -378,6 +369,7 @@ Item {
 
    function deleteActiveRect() {
        rects.pop()
+       unsavedChanges()
    }
 
    function scaleRect(rect, xscale, yscale) {
@@ -388,6 +380,22 @@ Item {
        rect.baseX *= xscale
        rect.baseY *= yscale
        updateRectOrigComponent(rect)
+   }
+
+   function recalculateRectsOriginal() {
+       for (var i in rects) {
+           updateRectOrigComponent(rects[i])
+       }
+
+       updateRects()
+   }
+
+   function recalculateRectsScaled() {
+       for (var i in rects) {
+           updateRectScaledComponent(rects[i])
+       }
+
+       updateRects()
    }
 
    function updateRectOrigComponent(rect) {

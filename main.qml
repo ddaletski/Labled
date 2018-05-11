@@ -15,6 +15,7 @@ ApplicationWindow {
     property string outputDir: ""
     property var labelsList: []
     property url currentImage
+    property bool unsavedChanges: false
 
 
     /***************** signals ***************/
@@ -24,7 +25,52 @@ ApplicationWindow {
     signal sigSaveImage(var rects)
 
 
+    function nextImage(step) {
+        if(unsavedChanges) {
+            unsavedChangesDialog.step = step
+            unsavedChangesDialog.mode = "next"
+            unsavedChangesDialog.open()
+        } else {
+            sigNextImage(step)
+        }
+    }
+
+
+    function loadImages() {
+        currentImage = ""
+        imageArea.rects = []
+        sigLoadImages(root.inputDir, root.outputDir)
+    }
+
+
+    function saveImage() {
+        unsavedChanges = false
+
+        if (imageArea.src == '')
+            return
+
+        var savedRects = []
+        for(var i in imageArea.rects) {
+            var r = imageArea.rects[i]
+            savedRects.push (
+                {
+                    x: r.origX,
+                    y: r.origY,
+                    width: r.origWidth,
+                    height: r.origHeight,
+                    label: labelsList[r.label].name
+                }
+            )
+        }
+
+        sigSaveImage(savedRects)
+    }
+
     /***************** slots ***************/
+
+    function imagesLoaded() {
+        sigNextImage(0)
+    }
 
     function nextImageLoaded(imageUrl, boxes)  {
         imageArea.rects = []
@@ -53,7 +99,8 @@ ApplicationWindow {
             root.inputDir = fileUrl
             if(root.outputDir == "")
                 root.outputDir = root.inputDir
-            root.sigLoadImages(root.inputDir, root.outputDir)
+
+            root.loadImages()
         }
 
         onRejected: {
@@ -67,7 +114,8 @@ ApplicationWindow {
         onAccepted: {
             mainItem.focus = true
             root.outputDir = fileUrl
-            root.sigLoadImages(root.inputDir, root.outputDir)
+
+            root.loadImages()
         }
 
         onRejected: {
@@ -81,10 +129,26 @@ ApplicationWindow {
         labelsList: root.labelsList
 
         onAccepted: {
+            console.log(label)
             if(label != '') {
                 var labelIdx = addLabel(label)
                 imageArea.updateLabel(labelIdx)
             }
+            mainItem.focus = true
+        }
+
+        onRejected: {
+            mainItem.focus = true
+        }
+    }
+
+
+    UnsavedChangesDialog {
+        id: unsavedChangesDialog
+
+        onAccepted: {
+            unsavedChanges = false
+            sigNextImage(step)
             mainItem.focus = true
         }
 
@@ -117,14 +181,37 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
+            ImageDraw {
+                id: imageArea
+
+                src: root.currentImage
+                labelsList: root.labelsList
+
+                darkBoxes: configMenu.darkBoxes
+                showLabels: configMenu.showLabels
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                rectBorderWidth: 2
+
+                onRectAdded: {
+                    labelDialog.label = ""
+                    labelDialog.open()
+                }
+
+                onUnsavedChanges: {
+                    root.unsavedChanges = true
+                }
+            }
 
             ColumnLayout {
-                Layout.fillHeight: true
+                width: 150
 
                 Button {
                     id: inputDirButton
                     height: 15
-                    width: 60
+                    width: parent.width
+
                     text: qsTr("Choose input dir")
 
                     onClicked: indirDialog.open()
@@ -133,45 +220,54 @@ ApplicationWindow {
                 Button {
                     id: outputDirButton
                     height: 15
-                    width: 60
+                    width: parent.width
 
                     text: qsTr("Choose output dir")
 
                     onClicked: outdirDialog.open()
                 }
-            }
 
-            ImageDraw {
-                id: imageArea
+                LabelsMenu {
+                    id: labelsMenu
+                    width: parent.width
+                    Layout.fillHeight: true
+                    Layout.preferredHeight: 3
+                    model: root.labelsList
 
-                src: root.currentImage
-                labelsList: root.labelsList
+                    onSigChooseColor: {
+                        colorDialog.chooseColor(labelIndex)
+                    }
 
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                rectBorderWidth: 2
+//                    onSigDeleteLabel: {
+//                        var end = imageArea.rects.length
+//                        for(var i = 0; i < end; ) {
+//                            if (imageArea.rects[i].label == labelIndex ) {
+//                                imageArea[i] = imageArea.rects[end-1]
+//                                imageArea.rects.pop()
+//                                end = imageArea.rects.length
+//                            } else {
+//                                ++i
+//                            }
+//
+//                        }
+//                        imageArea.updateRects()
+//
+//                        root.labelsList[labelIndex] = root.labelsList[root.labelsList.length-1]
+//                        root.labelsList.pop()
+//                        root.updateLabels()
+//
+//                        root.unsavedChanges = true
+//                    }
 
-                onRectAdded: {
-                    labelDialog.open()
-                    labelDialog.label = rect.label
                 }
 
-                onSrcChanged: {
-                    console.log(src)
+                ConfigurationMenu {
+                    id: configMenu
+                    width: parent.width
+                    Layout.fillHeight: true
+                    Layout.preferredHeight: 1
                 }
             }
-
-            LabelsMenu {
-                id: labelsMenu
-                width: 100
-                Layout.fillHeight: true
-                model: root.labelsList
-
-                onSigChooseColor: {
-                    colorDialog.chooseColor(labelIndex)
-                }
-            }
-
         } // RowLayout
 
         Keys.onSpacePressed: {
@@ -195,18 +291,26 @@ ApplicationWindow {
                 break
             case Qt.Key_E:
                 if (imageArea.rects.length) {
+                    labelDialog.label = imageArea.lastRect.label >= 0 ? root.labelsList[imageArea.lastRect.label].name : ""
                     labelDialog.open()
-                    labelDialog.label = imageArea.lastRect.label
                 }
                 break
+            case Qt.Key_W:
+                imageArea.isSelection = 1 - imageArea.isSelection
+                break
             case Qt.Key_S:
-                sigSaveImage(imageArea.rects)
+                root.saveImage()
                 break
             case Qt.Key_D:
-                sigNextImage(1)
+                root.nextImage(1)
                 break
             case Qt.Key_A:
-                sigNextImage(-1)
+                root.nextImage(-1)
+                break
+            case Qt.Key_Z:
+                unsavedChangesDialog.step = 0
+                unsavedChangesDialog.mode = "undo"
+                unsavedChangesDialog.open()
                 break
             }
         }

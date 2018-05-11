@@ -3,10 +3,11 @@ import QtQuick 2.4
 Item {
     id: root
 
-    property alias showLabel: drawnLabel.visible
+    property bool showLabel: true
     property alias label: drawnLabel.text
     property color borderColor: "red"
     property color fillColor: "transparent"
+    property color textBgColor: "white"
     property color textColor: "black"
 
     property int borderWidth: 1
@@ -23,6 +24,7 @@ Item {
     }
 
     Rectangle {
+        visible: root.showLabel && drawnLabel.text != ''
         anchors {
             fill: drawnLabel
             leftMargin: -drawnLabel.anchors.leftMargin
@@ -30,15 +32,15 @@ Item {
             topMargin: -1
             bottomMargin: -1
         }
-        visible: drawnLabel.text != ''
 
-        color: drawnRect.color
+        color: root.textBgColor
         border.color: drawnRect.border.color
         border.width: root.borderWidth
     }
 
     Text {
         id: drawnLabel
+        visible: root.showLabel
         anchors {
             bottom: if (drawnRect.y > height) drawnRect.top
             top: if (drawnRect.y <= height) drawnRect.bottom
