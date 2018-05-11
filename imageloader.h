@@ -13,7 +13,7 @@ class ImagesLoader : public QObject {
 
 public slots:
     void loadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
-    void nextImage();
+    void nextImage(int step);
     void saveImage(const QVariant& rects);
 
 signals:
@@ -22,8 +22,8 @@ signals:
 
 private:
     QUrl _currentImage;
-    QQueue<QUrl> _images;
-    QVector<QUrl> _annotations;
+    QVector<QPair<QUrl, QUrl>> _images;
+    size_t _idx;
 };
 
 

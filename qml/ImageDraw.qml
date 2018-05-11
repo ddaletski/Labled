@@ -39,11 +39,11 @@ Item {
                 borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
                 borderWidth: root.rectBorderWidth
                 fillColor: {
+                    var col = img.invertColors ? 1 : 0
                     if(index == root.rects.length-1) {
-                        var alpha = img.invertColors ? 0.8 : 0.2
-                        Qt.rgba(0.1, 0.1, 0.1, alpha)
+                        Qt.rgba(col, col, col, 0.4)
                     } else {
-                        "transparent"
+                        Qt.rgba(col, col, col, 0.3)
                     }
                 }
                 textColor: img.invertColors ? "black" : "white"

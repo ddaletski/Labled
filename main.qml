@@ -13,14 +13,13 @@ ApplicationWindow {
 
     property string inputDir: ""
     property string outputDir: ""
-    property var labelsList: [{name: 'a', color: 'red'}, {name: 'b', color: 'blue'}, {name: 'c', color: 'black'}]
+    property var labelsList: []
     property url currentImage
 
 
     /***************** signals ***************/
 
-
-    signal sigNextImage()
+    signal sigNextImage(int step)
     signal sigLoadImages(url imagesDir, url labelsDir)
     signal sigSaveImage(var rects)
 
@@ -28,6 +27,8 @@ ApplicationWindow {
     /***************** slots ***************/
 
     function nextImageLoaded(imageUrl, boxes)  {
+        imageArea.rects = []
+
         currentImage = imageUrl
 
         var xs = imageArea.xscale
@@ -49,7 +50,9 @@ ApplicationWindow {
 
         onAccepted: {
             mainItem.focus = true
-            inputDir = fileUrl
+            root.inputDir = fileUrl
+            if(root.outputDir == "")
+                root.outputDir = root.inputDir
             root.sigLoadImages(root.inputDir, root.outputDir)
         }
 
@@ -63,7 +66,7 @@ ApplicationWindow {
 
         onAccepted: {
             mainItem.focus = true
-            inputDir = fileUrl
+            root.outputDir = fileUrl
             root.sigLoadImages(root.inputDir, root.outputDir)
         }
 
@@ -124,9 +127,7 @@ ApplicationWindow {
                     width: 60
                     text: qsTr("Choose input dir")
 
-                    onClicked: {
-                        indirDialog.open()
-                    }
+                    onClicked: indirDialog.open()
                 }
 
                 Button {
@@ -148,10 +149,15 @@ ApplicationWindow {
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                rectBorderWidth: 2
 
                 onRectAdded: {
                     labelDialog.open()
                     labelDialog.label = rect.label
+                }
+
+                onSrcChanged: {
+                    console.log(src)
                 }
             }
 
@@ -197,8 +203,11 @@ ApplicationWindow {
                 sigSaveImage(imageArea.rects)
                 break
             case Qt.Key_D:
-                sigNextImage()
-                break;
+                sigNextImage(1)
+                break
+            case Qt.Key_A:
+                sigNextImage(-1)
+                break
             }
         }
 

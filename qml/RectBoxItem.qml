@@ -18,6 +18,7 @@ Item {
     Rectangle {
         id: drawnRect
         border.color: borderColor
+        border.width: root.borderWidth
         color: fillColor
     }
 
