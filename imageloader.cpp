@@ -75,7 +75,7 @@ QVariantList ImagesLoader::LoadAnnotations() {
         QDomNode bbox = object.elementsByTagName("bndbox").at(0);
         QDomNodeList boxChilds = bbox.childNodes();
 
-        int xmin, ymin, xmax, ymax;
+        int xmin=0, ymin=0, xmax=0, ymax=0;
         for(int i = 0; i < boxChilds.size(); ++i) {
             QDomElement coord = boxChilds.at(i).toElement();
             int val = coord.text().toInt();

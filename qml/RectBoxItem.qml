@@ -9,6 +9,7 @@ Item {
     property color fillColor: "transparent"
     property color textBgColor: "white"
     property color textColor: "black"
+    property int textSize: 8
 
     property int borderWidth: 1
     property alias _width: drawnRect.width
@@ -50,5 +51,6 @@ Item {
         }
         color: root.textColor
         font.bold: true
+        font.pixelSize: root.textSize
     }
 }

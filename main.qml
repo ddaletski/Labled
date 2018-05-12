@@ -9,6 +9,8 @@ ApplicationWindow {
     visible: true
     width: 1024
     height: 720
+    minimumWidth: 640
+    minimumHeight: 480
     title: qsTr("Labled")
 
     property string inputDir: ""
@@ -53,15 +55,16 @@ ApplicationWindow {
         var savedRects = []
         for(var i in imageArea.rects) {
             var r = imageArea.rects[i]
-            savedRects.push (
-                        {
-                            x: r.origX,
-                            y: r.origY,
-                            width: r.origWidth,
-                            height: r.origHeight,
-                            label: labelsList[r.label].name
-                        }
-                        )
+            try {
+                var newRect = {
+                    x: r.origX,
+                    y: r.origY,
+                    width: r.origWidth,
+                    height: r.origHeight,
+                    label: labelsList[r.label].name
+                }
+                savedRects.push(newRect)
+            } catch (e) { }
         }
 
         sigSaveImage(savedRects)
@@ -83,7 +86,7 @@ ApplicationWindow {
 
         for(var i in boxes) {
             var box = boxes[i]
-            imageArea.rects.push( imageArea.rectItem(box.x * xs, box.y * ys, box.width * xs, box.height * ys, addLabel(box.label)) )
+            imageArea.rects.push( imageArea.rectItemFromOrig(box.x, box.y, box.width, box.height, addLabel(box.label)) )
         }
 
         imageArea.updateRects()
@@ -130,7 +133,7 @@ ApplicationWindow {
         labelsList: root.labelsList
 
         onAccepted: {
-            if(label != '') {
+            if(label.length) {
                 var labelIdx = addLabel(label)
                 imageArea.updateLabel(labelIdx)
             } else {
@@ -141,6 +144,10 @@ ApplicationWindow {
         }
 
         onRejected: {
+            mainItem.focus = true
+            if(imageArea.lastRect.label < 0)
+                imageArea.deleteActiveRect()
+
             mainItem.focus = true
         }
     }
@@ -176,6 +183,7 @@ ApplicationWindow {
 
                 darkBoxes: configMenu.darkBoxes
                 showLabels: configMenu.showLabels
+                labelsSize: configMenu.labelsSize
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -202,7 +210,7 @@ ApplicationWindow {
             }
 
             Item {
-                width: 150
+                width: 200
                 Layout.fillHeight: true
 
                 ColumnLayout {
@@ -251,7 +259,7 @@ ApplicationWindow {
                             rightMargin: 5
                         }
                         Layout.fillHeight: true
-                        Layout.preferredHeight: 3
+//                        Layout.preferredHeight: bounded(0.2 * model.length, 1, 2)
                         model: root.labelsList
 
                         onSigChangeColor: {
@@ -294,7 +302,7 @@ ApplicationWindow {
                             rightMargin: 5
                         }
                         Layout.fillHeight: true
-                        Layout.preferredHeight: 1
+//                        Layout.preferredHeight: 1
                     }
 
                 } // ColumnLayout
@@ -363,5 +371,9 @@ ApplicationWindow {
     function updateLabels() {
         labelsList = labelsList
     }
+
+   function bounded(val, min, max) {
+       return Math.max(Math.min(val, max), min)
+   }
 
 } // window

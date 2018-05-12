@@ -6,6 +6,7 @@ Item {
     id: root
     property alias darkBoxes: boxesSwitch.checked
     property alias showLabels: showLabelsSwitch.checked
+    property alias labelsSize: labelsTextSizeSlider.value
 
     ColumnLayout {
         anchors.fill: parent
@@ -19,6 +20,22 @@ Item {
             id: showLabelsSwitch
             text: qsTr("Show box label")
             checked: true
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Label {
+                text: qsTr("Labels size:")
+            }
+
+            Slider {
+                id: labelsTextSizeSlider
+                from: 8
+                to: 64
+                stepSize: 1
+                value: (to + from) / 2
+                Layout.fillWidth: true
+            }
         }
     }
 }

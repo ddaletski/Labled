@@ -11,6 +11,11 @@ Project {
         // Additional import path used to resolve QML modules in Qt Creator's code model
         property pathList qmlImportPaths: []
 
+        cpp.driverFlags: [
+            "-static",
+            "-static-libgcc",
+        ]
+
         cpp.cxxLanguageVersion: "c++14"
 
         cpp.defines: [

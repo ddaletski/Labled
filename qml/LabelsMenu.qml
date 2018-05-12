@@ -121,14 +121,15 @@ Item {
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: root.sigDeleteLabel(index)
+                        onClicked: root.sigDeleteLabel(modelData)
                     }
                 }
 
                 MouseArea {
                     anchors.fill: txt
                     onClicked: {
-                        colorDialog.label = index
+                        colorDialog.label = modelData
+                        colorDialog.color = root.model[modelData].color
                         colorDialog.open()
                     }
                 }
@@ -142,6 +143,16 @@ Item {
             if(matches(labelsList[i].name, filter))
                 model.push(i)
         }
+//        model = model.sort(function(a, b) {
+//            var name1 = labelsList[a].name
+//            var name2 = labelsList[b].name
+//            if(name1 < name2)
+//                return -1
+//            else if (name1 > name2)
+//                return 1
+//            else
+//                return 0
+//        })
         return model
     }
 
