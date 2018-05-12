@@ -11,5 +11,7 @@
         <file>qml/ConfigurationMenu.qml</file>
         <file>qml/UnsavedChangesDialog.qml</file>
         <file>img/garbage_can.png</file>
+        <file>qml/HorizontalLine.qml</file>
+        <file>qml/VerticalLine.qml</file>
     </qresource>
 </RCC>

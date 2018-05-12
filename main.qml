@@ -9,11 +9,12 @@ ApplicationWindow {
     visible: true
     width: 1024
     height: 720
-    title: qsTr("Lable")
+    title: qsTr("Labled")
 
     property string inputDir: ""
     property string outputDir: ""
     property var labelsList: []
+    property alias defaultLabel: labelsMenu.defaultLabel
     property url currentImage
     property bool unsavedChanges: false
 
@@ -53,14 +54,14 @@ ApplicationWindow {
         for(var i in imageArea.rects) {
             var r = imageArea.rects[i]
             savedRects.push (
-                {
-                    x: r.origX,
-                    y: r.origY,
-                    width: r.origWidth,
-                    height: r.origHeight,
-                    label: labelsList[r.label].name
-                }
-            )
+                        {
+                            x: r.origX,
+                            y: r.origY,
+                            width: r.origWidth,
+                            height: r.origHeight,
+                            label: labelsList[r.label].name
+                        }
+                        )
         }
 
         sigSaveImage(savedRects)
@@ -129,11 +130,13 @@ ApplicationWindow {
         labelsList: root.labelsList
 
         onAccepted: {
-            console.log(label)
             if(label != '') {
                 var labelIdx = addLabel(label)
                 imageArea.updateLabel(labelIdx)
+            } else {
+                open()
             }
+
             mainItem.focus = true
         }
 
@@ -154,22 +157,6 @@ ApplicationWindow {
 
         onRejected: {
             mainItem.focus = true
-        }
-    }
-
-
-    ColorChooseDialog {
-        id: colorDialog
-
-        onAccepted: {
-            if(labelIndex >= 0) {
-                labelsList[labelIndex].color = color
-            }
-            root.updateLabels()
-        }
-
-        onRejected: {
-            labelIndex = -1
         }
     }
 
@@ -195,8 +182,12 @@ ApplicationWindow {
                 rectBorderWidth: 2
 
                 onRectAdded: {
-                    labelDialog.label = ""
-                    labelDialog.open()
+                    if(defaultLabel < 0) {
+                        labelDialog.label = ""
+                        labelDialog.open()
+                    } else {
+                        imageArea.updateLabel(defaultLabel)
+                    }
                 }
 
                 onUnsavedChanges: {
@@ -204,70 +195,103 @@ ApplicationWindow {
                 }
             }
 
-            ColumnLayout {
+            VerticalLine {
+                width: 1
+                lineWidth: 1
+                Layout.fillHeight: true
+            }
+
+            Item {
                 width: 150
+                Layout.fillHeight: true
 
-                Button {
-                    id: inputDirButton
-                    height: 15
-                    width: parent.width
+                ColumnLayout {
+                    anchors.fill: parent
 
-                    text: qsTr("Choose input dir")
+                    Button {
+                        id: inputDirButton
+                        height: 15
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            rightMargin: 5
+                        }
 
-                    onClicked: indirDialog.open()
-                }
+                        text: qsTr("Choose input dir")
 
-                Button {
-                    id: outputDirButton
-                    height: 15
-                    width: parent.width
-
-                    text: qsTr("Choose output dir")
-
-                    onClicked: outdirDialog.open()
-                }
-
-                LabelsMenu {
-                    id: labelsMenu
-                    width: parent.width
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 3
-                    model: root.labelsList
-
-                    onSigChooseColor: {
-                        colorDialog.chooseColor(labelIndex)
+                        onClicked: indirDialog.open()
                     }
 
-//                    onSigDeleteLabel: {
-//                        var end = imageArea.rects.length
-//                        for(var i = 0; i < end; ) {
-//                            if (imageArea.rects[i].label == labelIndex ) {
-//                                imageArea[i] = imageArea.rects[end-1]
-//                                imageArea.rects.pop()
-//                                end = imageArea.rects.length
-//                            } else {
-//                                ++i
-//                            }
-//
-//                        }
-//                        imageArea.updateRects()
-//
-//                        root.labelsList[labelIndex] = root.labelsList[root.labelsList.length-1]
-//                        root.labelsList.pop()
-//                        root.updateLabels()
-//
-//                        root.unsavedChanges = true
-//                    }
+                    Button {
+                        id: outputDirButton
+                        height: 15
 
-                }
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            rightMargin: 5
+                        }
 
-                ConfigurationMenu {
-                    id: configMenu
-                    width: parent.width
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 1
-                }
+                        text: qsTr("Choose output dir")
+
+                        onClicked: outdirDialog.open()
+                    }
+
+                    HorizontalLine {
+                        height: 15
+                        lineHeight: 1
+                        Layout.fillWidth: true
+                    }
+
+                    LabelsMenu {
+                        id: labelsMenu
+                        width: parent.width
+                        Layout.fillHeight: true
+                        Layout.preferredHeight: 3
+                        model: root.labelsList
+
+                        onSigChangeColor: {
+                            root.labelsList[labelIndex].color = newColor
+                            root.updateLabels()
+                        }
+
+                        onSigDeleteLabel: {
+                            console.log("L: ", labelIndex)
+
+                            imageArea.rects = imageArea.rects.filter(function (r) {
+                                return r.label != labelIndex
+                            })
+
+                            for(var i in imageArea.rects) {
+                                if (imageArea.rects[i].label > labelIndex) {
+                                    --(imageArea.rects[i].label)
+                                }
+                            }
+
+                            imageArea.updateRects()
+                            root.labelsList.splice(labelIndex, 1)
+                            root.updateLabels()
+
+                            root.unsavedChanges = true
+                        }
+                    }
+
+                    HorizontalLine {
+                        height: 15
+                        lineHeight: 1
+                        Layout.fillWidth: true
+                    }
+
+                    ConfigurationMenu {
+                        id: configMenu
+                        width: parent.width
+                        Layout.fillHeight: true
+                        Layout.preferredHeight: 1
+                    }
+
+                } // ColumnLayout
             }
+
         } // RowLayout
 
         Keys.onSpacePressed: {

@@ -3,11 +3,5 @@ import QtQuick.Dialogs 1.2
 
 ColorDialog {
     id: root
-
-    property int labelIndex: -1
-
-    function chooseColor(idx) {
-        labelIndex = idx
-        open()
-    }
+    property int label: -1
 }

@@ -6,15 +6,45 @@ import QtQuick.Controls 2.2
 Item {
     id: root
     property alias model: labelsList.model
-    signal sigChooseColor(int labelIndex)
+    property int defaultLabel: -1
+    signal sigChangeColor(int labelIndex, color newColor)
     signal sigDeleteLabel(int labelIndex)
+
+
+    ColorChooseDialog {
+        id: colorDialog
+
+        onAccepted: {
+            if(label >= 0) {
+                sigChangeColor(label, color)
+                label = -1
+            }
+        }
+
+        onRejected: {
+            label = -1
+        }
+    }
+
 
     ColumnLayout {
         anchors.fill: parent
 
+//        Label {
+//            id: defaultLabelTitle
+//            text: qsTr("Default label:")
+//            Layout.fillWidth: true
+//        }
+//
+//        TextField {
+//            id: defaultLabelInput
+//            placeholderText: "label"
+//            Layout.fillWidth: true
+//        }
+
         Label {
             id: menuTitle
-            text: qsTr("Labels:")
+            text: qsTr("All labels:")
             Layout.fillWidth: true
         }
 
@@ -28,13 +58,14 @@ Item {
 
             delegate: Rectangle {
                 width: root.width
-                height: txt.height
+                height: txt.height + 10
                 border.color: modelData.color
                 Text {
                     id: txt
                     anchors {
                         left: parent.left
                         right: parent.right
+                        verticalCenter: parent.verticalCenter
                         leftMargin: 10
                         rightMargin: 10 + height
                     }
@@ -45,15 +76,15 @@ Item {
                     id: deleteLabel
                     anchors {
                         right: parent.right
-                        top: parent.top
-                        bottom: parent.bottom
+                        rightMargin: 5
+                        verticalCenter: parent.verticalCenter
                     }
+                    height: txt.height
                     width: height
                     source: "/img/garbage_can.png"
 
                     MouseArea {
                         anchors.fill: parent
-
                         onClicked: root.sigDeleteLabel(index)
                     }
                 }
@@ -61,7 +92,8 @@ Item {
                 MouseArea {
                     anchors.fill: txt
                     onClicked: {
-                        root.sigChooseColor(index)
+                        colorDialog.label = index
+                        colorDialog.open()
                     }
                 }
             }

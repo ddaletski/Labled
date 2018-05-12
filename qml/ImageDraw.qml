@@ -49,9 +49,9 @@ Item {
                 fillColor: {
                     var col = darkBoxes ? 0 : 1
                     if(index == root.rects.length-1) {
-                        Qt.rgba(col, col, col, 0.4)
+                        Qt.rgba(col, col, col, 0.3)
                     } else {
-                        Qt.rgba(col, col, col, 0.2)
+                        Qt.rgba(col, col, col, 0.15)
                     }
                 }
                 textBgColor: {
