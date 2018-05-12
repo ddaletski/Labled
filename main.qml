@@ -245,7 +245,11 @@ ApplicationWindow {
 
                     LabelsMenu {
                         id: labelsMenu
-                        width: parent.width
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            rightMargin: 5
+                        }
                         Layout.fillHeight: true
                         Layout.preferredHeight: 3
                         model: root.labelsList
@@ -284,7 +288,11 @@ ApplicationWindow {
 
                     ConfigurationMenu {
                         id: configMenu
-                        width: parent.width
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            rightMargin: 5
+                        }
                         Layout.fillHeight: true
                         Layout.preferredHeight: 1
                     }
