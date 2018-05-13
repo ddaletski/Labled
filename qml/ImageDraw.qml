@@ -54,7 +54,7 @@ Item {
                 fillColor: {
                     var col = darkBoxes ? 0 : 1
                     if(index == root.rects.length-1) {
-                        Qt.rgba(Math.abs(0.25 - col), col, col, 0.4)
+                        Qt.rgba(1 - col, col, col, 0.4)
                     } else {
                         Qt.rgba(col, col, col, 0.2)
                     }
@@ -364,6 +364,7 @@ Item {
         if (rects.length)
             rects[rects.length - 1].label = label
         updateRects()
+        unsavedChanges()
     }
 
     function bounded(val, min, max) {
