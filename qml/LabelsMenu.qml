@@ -1,6 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.2
+import QtQuick.Controls 1.4
 
 
 Item {
@@ -33,7 +33,8 @@ Item {
 
         Label {
             id: defaultLabelTitle
-            text: qsTr("Default label: \n") + (defaultLabel >= 0 ? model[defaultLabel].name : "")
+            text: qsTr("Default label: ") + (defaultLabel >= 0 ? model[defaultLabel].name : "")
+            clip: true
             Layout.fillWidth: true
         }
 
@@ -49,6 +50,7 @@ Item {
                 id: filterInput
                 placeholderText: "filter regexp"
                 Layout.fillWidth: true
+                selectByMouse: true
             }
         }
 
@@ -77,6 +79,7 @@ Item {
                         leftMargin: 10 + height
                         rightMargin: 10 + height
                     }
+                    clip: true
                     text: root.model[modelData].name
                 }
 
@@ -117,7 +120,7 @@ Item {
                     }
                     height: txt.height
                     width: height
-                    source: "/img/garbage_can.png"
+                    source: "/img/diag_cross.svg"
 
                     MouseArea {
                         anchors.fill: parent

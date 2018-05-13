@@ -1,5 +1,5 @@
 import QtQuick 2.4
-import QtQuick.Controls 2.2
+import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 Item {
@@ -8,34 +8,42 @@ Item {
     property alias showLabels: showLabelsSwitch.checked
     property alias labelsSize: labelsTextSizeSlider.value
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
+        columns: 2
 
+        Label {
+            text: qsTr("Dark boxes")
+        }
         Switch {
             id: boxesSwitch
-            text: qsTr("Dark boxes")
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        }
+
+        Label {
+            text: qsTr("Show box label")
         }
 
         Switch {
             id: showLabelsSwitch
-            text: qsTr("Show box label")
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+
             checked: true
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Label {
-                text: qsTr("Labels size:")
-            }
+        Label {
+            text: qsTr("Labels size:")
+        }
 
-            Slider {
-                id: labelsTextSizeSlider
-                from: 8
-                to: 64
-                stepSize: 1
-                value: (to + from) / 2
-                Layout.fillWidth: true
-            }
+        Slider {
+            id: labelsTextSizeSlider
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+
+            minimumValue: 8
+            maximumValue: 64
+            stepSize: 1
+            value: 0.75 * minimumValue + 0.25 * maximumValue
+            Layout.fillWidth: true
         }
     }
 }

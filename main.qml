@@ -1,5 +1,5 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import "qml"
 
@@ -16,7 +16,7 @@ ApplicationWindow {
     property string inputDir: ""
     property string outputDir: ""
     property var labelsList: []
-    property alias defaultLabel: labelsMenu.defaultLabel
+    property alias defaultLabel: sideMenu.defaultLabel
     property url currentImage
     property bool unsavedChanges: false
 
@@ -93,6 +93,12 @@ ApplicationWindow {
     }
 
     ///////////////////////////////////////////
+
+
+    CropTool {
+        id: cropTool
+        //Component.onCompleted: open()
+    }
 
 
     FileChooseDialog {
@@ -181,9 +187,9 @@ ApplicationWindow {
                 src: root.currentImage
                 labelsList: root.labelsList
 
-                darkBoxes: configMenu.darkBoxes
-                showLabels: configMenu.showLabels
-                labelsSize: configMenu.labelsSize
+                darkBoxes: sideMenu.darkBoxes
+                showLabels: sideMenu.showLabels
+                labelsSize: sideMenu.labelsSize
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -209,106 +215,18 @@ ApplicationWindow {
                 Layout.fillHeight: true
             }
 
-            Item {
+            SideMenu {
+                id: sideMenu
                 width: 200
                 Layout.fillHeight: true
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+                labelsList: root.labelsList
 
-                ColumnLayout {
-                    anchors.fill: parent
-
-                    Button {
-                        id: inputDirButton
-                        height: 15
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            rightMargin: 5
-                        }
-
-                        text: qsTr("Choose input dir")
-
-                        onClicked: indirDialog.open()
-                    }
-
-                    Button {
-                        id: outputDirButton
-                        height: 15
-
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            rightMargin: 5
-                        }
-
-                        text: qsTr("Choose output dir")
-
-                        onClicked: outdirDialog.open()
-                    }
-
-                    HorizontalLine {
-                        height: 15
-                        lineHeight: 1
-                        Layout.fillWidth: true
-                    }
-
-                    LabelsMenu {
-                        id: labelsMenu
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            rightMargin: 5
-                        }
-                        Layout.fillHeight: true
-//                        Layout.preferredHeight: bounded(0.2 * model.length, 1, 2)
-                        model: root.labelsList
-
-                        onSigChangeColor: {
-                            root.labelsList[labelIndex].color = newColor
-                            root.updateLabels()
-                        }
-
-                        onSigDeleteLabel: {
-                            console.log("L: ", labelIndex)
-
-                            imageArea.rects = imageArea.rects.filter(function (r) {
-                                return r.label != labelIndex
-                            })
-
-                            for(var i in imageArea.rects) {
-                                if (imageArea.rects[i].label > labelIndex) {
-                                    --(imageArea.rects[i].label)
-                                }
-                            }
-
-                            imageArea.updateRects()
-                            root.labelsList.splice(labelIndex, 1)
-                            root.updateLabels()
-
-                            root.unsavedChanges = true
-                        }
-                    }
-
-                    HorizontalLine {
-                        height: 15
-                        lineHeight: 1
-                        Layout.fillWidth: true
-                    }
-
-                    ConfigurationMenu {
-                        id: configMenu
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            rightMargin: 5
-                        }
-                        Layout.fillHeight: true
-//                        Layout.preferredHeight: 1
-                    }
-
-                } // ColumnLayout
+                onUnsavedChanges: root.unsavedChanges = true
+                onUpdateLabels: root.updateLabels()
             }
-
-        } // RowLayout
+        }
 
         Keys.onSpacePressed: {
             imageArea.isSelection = 1 - imageArea.isSelection
@@ -372,8 +290,8 @@ ApplicationWindow {
         labelsList = labelsList
     }
 
-   function bounded(val, min, max) {
-       return Math.max(Math.min(val, max), min)
-   }
+    function bounded(val, min, max) {
+        return Math.max(Math.min(val, max), min)
+    }
 
 } // window

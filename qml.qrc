@@ -10,8 +10,13 @@
         <file>qml/ColorChooseDialog.qml</file>
         <file>qml/ConfigurationMenu.qml</file>
         <file>qml/UnsavedChangesDialog.qml</file>
-        <file>img/garbage_can.png</file>
         <file>qml/HorizontalLine.qml</file>
         <file>qml/VerticalLine.qml</file>
+        <file>qml/CropTool.qml</file>
+        <file>img/folder.svg</file>
+        <file>img/backspace.svg</file>
+        <file>img/garbage_can.svg</file>
+        <file>img/diag_cross.svg</file>
+        <file>qml/SideMenu.qml</file>
     </qresource>
 </RCC>

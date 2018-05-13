@@ -1,5 +1,5 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.3
+import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.3
 
@@ -7,12 +7,13 @@ Dialog {
     id: root
     property alias label: textInput.text
     property var labelsList: []
+    width: 200
 
     standardButtons: StandardButton.Cancel | StandardButton.Ok
 
     ColumnLayout {
         id: col
-        width: 300
+        width: parent.width
 
         Rectangle {
             id: listViewRect
@@ -21,7 +22,7 @@ Dialog {
             Layout.fillWidth: true
             visible: root.labelsList.length
 
-            color: "transparent"
+            color: Qt.rgba(10, 10, 10, 0.1)
             border.color: activeFocus ? "red" : "transparent"
 
             KeyNavigation.tab: textInput
@@ -42,10 +43,24 @@ Dialog {
                     width: labelsListView.width
                     height: 30
                     color: "transparent"
+                    border.color: Qt.rgba(0, 0, 0, 0.1)
 
-                    Text {
+                    Label {
+                        id: lbl
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            leftMargin: 5
+                            verticalCenter: parent.verticalCenter
+                        }
+                        font.pixelSize: 12
+                        text: "" + (index < 9 ? (index+1) + ") " : "") + modelData.name
+                    }
+                    MouseArea {
                         anchors.fill: parent
-                        text: "" + (index < 9 ? (index+1) + ": " : "") + modelData.name
+                        onClicked: {
+                            root.label = labelsList[index].name
+                        }
                     }
                 }
             }
@@ -63,16 +78,16 @@ Dialog {
 
         Item {
             height: 20
+            Layout.fillWidth: true
             visible: root.labelsList.length
         }
 
         TextField { // new label field
             id: textInput
             Layout.fillWidth: true
-
             KeyNavigation.backtab: listViewRect
-
             placeholderText: "label"
+            selectByMouse: true
         }
     }
 
