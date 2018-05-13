@@ -132,6 +132,7 @@ ApplicationWindow {
     LabelChooseDialog {
         id: labelDialog
         labelsList: root.labelsList
+        enableShortcuts: sideMenu.enableLabelsShortcuts
 
         onAccepted: {
             if(label.length) {
@@ -170,6 +171,8 @@ ApplicationWindow {
 
     CropTool {
         id: cropTool
+        objectName: "cropTool"
+
         inputDir: root.imagesDir
         annotationsDir: root.annotationsDir
     }
@@ -316,17 +319,15 @@ ApplicationWindow {
             }
         }
 
+        Keys.onEscapePressed: {
+            imageArea.isSelection = false
+        }
+
+        Keys.onTabPressed: {
+            imageArea.shiftRects()
+            imageArea.updateRects()
+        }
     } // mainItem
-
-
-    Keys.onEscapePressed: {
-        imageArea.isSelection = false
-    }
-
-    Keys.onTabPressed: {
-        imageArea.shiftRects()
-        imageArea.updateRects()
-    }
 
 
     function addLabel(label) {

@@ -7,10 +7,21 @@ Item {
     property alias darkBoxes: boxesSwitch.checked
     property alias showLabels: showLabelsSwitch.checked
     property alias labelsSize: labelsTextSizeSlider.value
+    property alias enableLabelsShortcuts: enableLabelsShotcutsSwitch.checked
 
     GridLayout {
         anchors.fill: parent
         columns: 2
+
+        Label {
+            text: qsTr("Enable label choice shortcuts")
+        }
+        Switch {
+            id: enableLabelsShotcutsSwitch
+            checked: false
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        }
+
 
         Label {
             text: qsTr("Dark boxes")

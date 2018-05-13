@@ -7,6 +7,7 @@ Dialog {
     id: root
     property alias label: textInput.text
     property var labelsList: []
+    property bool enableShortcuts: false
     width: 200
 
     standardButtons: StandardButton.NoButton
@@ -55,7 +56,7 @@ Dialog {
                             verticalCenter: parent.verticalCenter
                         }
                         font.pointSize: 12
-                        text: "" + (index < 9 ? (index+1) + ") " : "") + modelData.name
+                        text: "" + ((enableShortcuts && index < 9) ? (index+1) + ") " : "") + modelData.name
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -67,7 +68,7 @@ Dialog {
             }
 
             Keys.onPressed: { // quick choice shortcuts
-                if(event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
+                if(enableShortcuts && event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
                     var idx = event.key - Qt.Key_1
                     if(root.labelsList.length > idx) {
                         label = labelsList[idx].name
@@ -107,6 +108,9 @@ Dialog {
     }
 
     onVisibleChanged: {
-        listViewRect.focus = true
+        if(enableShortcuts)
+            listViewRect.focus = true
+        else
+            textInput.focus = true
     }
 }

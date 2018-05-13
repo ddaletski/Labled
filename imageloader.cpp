@@ -23,6 +23,22 @@ void ImagesLoader::ToEnd() {
     _idx = _images.size() - 1;
 }
 
+int ImagesLoader::Index() {
+    return _idx;
+}
+
+int ImagesLoader::Count() {
+    return _images.size();
+}
+
+bool ImagesLoader::IsStart() {
+    return _idx <= 0;
+}
+
+bool ImagesLoader::IsEnd() {
+    return _images.size() == 0 || (_idx >= _images.size() - 1);
+}
+
 void ImagesLoader::LoadImages(const QUrl &imagesDir, const QUrl &annotationsDir) {
     QDir imagesDir_(imagesDir.toLocalFile());
     QDir annotationsDir_(annotationsDir.toLocalFile());

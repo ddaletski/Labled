@@ -10,6 +10,7 @@ Dialog {
     property url annotationsDir: ""
     property url outputDir: ""
 
+
     standardButtons: StandardButton.NoButton
 
     FileChooseDialog {
@@ -39,6 +40,12 @@ Dialog {
             mainItem.focus = true
         }
     }
+
+    MessageDialog {
+        id: completedDialog
+        text: qsTr("Cropping completed")
+    }
+
 
     ColumnLayout {
         id: mainItem
@@ -150,9 +157,33 @@ Dialog {
 
         RowLayout {
             anchors.right: parent.right
+
+            ProgressBar {
+                id: progressBar
+                Layout.fillWidth: true
+                minimumValue: 0
+                maximumValue: 1
+                value: 0
+
+                Connections {
+                    target: cropToolBackend
+                    onProgressChanged: progressBar.value = progress
+                }
+
+                onValueChanged: {
+                    if(value == 1) {
+                        completedDialog.open()
+                        value = 0
+                    }
+                }
+            }
+
             Button {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
+                onClicked: {
+                    cropToolBackend.Crop(root.inputDir, root.annotationsDir, root.outputDir, patternField.text)
+                }
             }
             Button {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
@@ -165,7 +196,5 @@ Dialog {
         }
     } // column layout
 
-    Component.onCompleted: {
-        console.log(contentItem)
-    }
+
 }

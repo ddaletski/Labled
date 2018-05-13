@@ -9,6 +9,7 @@ Item {
     property alias darkBoxes: configMenu.darkBoxes
     property alias showLabels: configMenu.showLabels
     property alias labelsSize: configMenu.labelsSize
+    property alias enableLabelsShortcuts: configMenu.enableLabelsShortcuts
     property var labelsList: []
 
     signal unsavedChanges()

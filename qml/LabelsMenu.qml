@@ -40,6 +40,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            z: labelsList.z + 1
 
             Label {
                 id: filterTitle

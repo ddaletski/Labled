@@ -15,6 +15,10 @@ public:
     explicit ImagesLoader(QObject *parent = nullptr);
     void ToStart();
     void ToEnd();
+    int Index();
+    bool IsStart();
+    bool IsEnd();
+    int Count();
 
 public slots:
     void LoadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
