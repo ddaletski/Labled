@@ -13,8 +13,8 @@ ApplicationWindow {
     minimumHeight: 480
     title: qsTr("Labled")
 
-    property string inputDir: ""
-    property string outputDir: ""
+    property string imagesDir: ""
+    property string annotationsDir: ""
     property var labelsList: []
     property alias defaultLabel: sideMenu.defaultLabel
     property url currentImage
@@ -42,7 +42,7 @@ ApplicationWindow {
     function loadImages() {
         currentImage = ""
         imageArea.rects = []
-        sigLoadImages(root.inputDir, root.outputDir)
+        sigLoadImages(root.imagesDir, root.annotationsDir)
     }
 
 
@@ -95,20 +95,14 @@ ApplicationWindow {
     ///////////////////////////////////////////
 
 
-    CropTool {
-        id: cropTool
-        //Component.onCompleted: open()
-    }
-
-
     FileChooseDialog {
         id: indirDialog
 
         onAccepted: {
             mainItem.focus = true
-            root.inputDir = fileUrl
-            if(root.outputDir == "")
-                root.outputDir = root.inputDir
+            root.imagesDir = fileUrl
+            if(root.annotationsDir == "")
+                root.annotationsDir = root.imagesDir
 
             root.loadImages()
         }
@@ -118,12 +112,13 @@ ApplicationWindow {
         }
     }
 
+
     FileChooseDialog {
         id: outdirDialog
 
         onAccepted: {
             mainItem.focus = true
-            root.outputDir = fileUrl
+            root.annotationsDir = fileUrl
 
             root.loadImages()
         }
@@ -173,6 +168,98 @@ ApplicationWindow {
         }
     }
 
+    CropTool {
+        id: cropTool
+        inputDir: root.imagesDir
+        annotationsDir: root.annotationsDir
+    }
+
+
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            MenuItem {
+                text: "Choose input directory"
+                shortcut: "I"
+                onTriggered: {
+                    indirDialog.setFolder(root.imagesDir)
+                    indirDialog.open()
+                }
+            }
+            MenuItem {
+                text: "Choose output directory"
+                shortcut: "O"
+                onTriggered: {
+                    outdirDialog.setFolder(root.annotationsDir)
+                    outdirDialog.open()
+                }
+            }
+            MenuSeparator { }
+            MenuItem {
+                text: qsTr("Save labeling for current image")
+                shortcut: "S"
+                onTriggered: root.saveImage()
+            }
+            MenuItem {
+                text: qsTr("Load next image")
+                shortcut: "D"
+                onTriggered: root.nextImage(1)
+            }
+            MenuItem {
+                text: qsTr("Load previous image")
+                shortcut: "A"
+                onTriggered: root.nextImage(-1)
+            }
+        }
+        Menu {
+            title: "Edit"
+            MenuItem {
+                text: qsTr("Add new box")
+                shortcut: "W"
+                onTriggered: {
+                    imageArea.isSelection = 1 - imageArea.isSelection
+                }
+            }
+            MenuItem {
+                text: qsTr("Delete active box")
+                shortcut: "Q"
+                onTriggered: {
+                    imageArea.deleteActiveRect()
+                    imageArea.updateRects()
+                }
+            }
+            MenuItem {
+                text: qsTr("Edit current box's label")
+                shortcut: "E"
+                onTriggered: {
+                    if (imageArea.rects.length) {
+                        labelDialog.label = imageArea.lastRect.label >= 0 ? root.labelsList[imageArea.lastRect.label].name : ""
+                        labelDialog.open()
+                    }
+                }
+            }
+            MenuItem {
+                text: qsTr("Undo all changes")
+                shortcut: "Z"
+                onTriggered: {
+                    unsavedChangesDialog.step = 0
+                    unsavedChangesDialog.mode = "undo"
+                    unsavedChangesDialog.open()
+                }
+            }
+        }
+
+        Menu {
+            title: qsTr("Tools")
+
+            MenuItem {
+                text: qsTr("Cut images from boxes")
+                onTriggered: {
+                    cropTool.open()
+                }
+            }
+        }
+    }
 
     Item {
         id: mainItem
@@ -181,6 +268,7 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
+
             ImageDraw {
                 id: imageArea
 
@@ -228,52 +316,17 @@ ApplicationWindow {
             }
         }
 
-        Keys.onSpacePressed: {
-            imageArea.isSelection = 1 - imageArea.isSelection
-        }
-
-        Keys.onEscapePressed: {
-            imageArea.isSelection = false
-        }
-
-        Keys.onTabPressed: {
-            imageArea.shiftRects()
-            imageArea.updateRects()
-        }
-
-        Keys.onPressed: {
-            switch(event.key) {
-            case Qt.Key_Q:
-                imageArea.deleteActiveRect()
-                imageArea.updateRects()
-                break
-            case Qt.Key_E:
-                if (imageArea.rects.length) {
-                    labelDialog.label = imageArea.lastRect.label >= 0 ? root.labelsList[imageArea.lastRect.label].name : ""
-                    labelDialog.open()
-                }
-                break
-            case Qt.Key_W:
-                imageArea.isSelection = 1 - imageArea.isSelection
-                break
-            case Qt.Key_S:
-                root.saveImage()
-                break
-            case Qt.Key_D:
-                root.nextImage(1)
-                break
-            case Qt.Key_A:
-                root.nextImage(-1)
-                break
-            case Qt.Key_Z:
-                unsavedChangesDialog.step = 0
-                unsavedChangesDialog.mode = "undo"
-                unsavedChangesDialog.open()
-                break
-            }
-        }
-
     } // mainItem
+
+
+    Keys.onEscapePressed: {
+        imageArea.isSelection = false
+    }
+
+    Keys.onTabPressed: {
+        imageArea.shiftRects()
+        imageArea.updateRects()
+    }
 
 
     function addLabel(label) {

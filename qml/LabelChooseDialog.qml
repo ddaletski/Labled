@@ -9,11 +9,12 @@ Dialog {
     property var labelsList: []
     width: 200
 
-    standardButtons: StandardButton.Cancel | StandardButton.Ok
+    standardButtons: StandardButton.NoButton
 
     ColumnLayout {
         id: col
         width: parent.width
+        spacing: 10
 
         Rectangle {
             id: listViewRect
@@ -53,7 +54,7 @@ Dialog {
                             leftMargin: 5
                             verticalCenter: parent.verticalCenter
                         }
-                        font.pixelSize: 12
+                        font.pointSize: 12
                         text: "" + (index < 9 ? (index+1) + ") " : "") + modelData.name
                     }
                     MouseArea {
@@ -76,18 +77,32 @@ Dialog {
 
         }
 
-        Item {
-            height: 20
-            Layout.fillWidth: true
-            visible: root.labelsList.length
-        }
-
         TextField { // new label field
             id: textInput
             Layout.fillWidth: true
             KeyNavigation.backtab: listViewRect
             placeholderText: "label"
             selectByMouse: true
+        }
+
+        Row {
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            spacing: 5
+
+            Button {
+                text: qsTr("Ok")
+                onClicked: {
+                    root.accept()
+                }
+            }
+            Button {
+                text: qsTr("Cancel")
+                onClicked: {
+                    root.reject()
+                }
+
+                KeyNavigation.tab: listViewRect
+            }
         }
     }
 

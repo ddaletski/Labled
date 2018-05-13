@@ -13,6 +13,16 @@ static T bounded(T val, T min_val, T max_val) {
 }
 
 
+ImagesLoader::ImagesLoader(QObject *parent) : QObject(parent) {  }
+
+void ImagesLoader::ToStart() {
+    _idx = 0;
+}
+
+void ImagesLoader::ToEnd() {
+    _idx = _images.size() - 1;
+}
+
 void ImagesLoader::LoadImages(const QUrl &imagesDir, const QUrl &annotationsDir) {
     QDir imagesDir_(imagesDir.toLocalFile());
     QDir annotationsDir_(annotationsDir.toLocalFile());
@@ -34,11 +44,9 @@ void ImagesLoader::LoadImages(const QUrl &imagesDir, const QUrl &annotationsDir)
     emit imagesLoaded();
 }
 
-
-void ImagesLoader::NextImage(int step) {
+QPair<QUrl, QVariantList> ImagesLoader::NextImage(int step) {
     if(_images.size() == 0)
-        return;
-
+        return {QUrl(), QVariantList()};
 
     _idx = bounded<int>(_idx + step, 0, _images.size()-1);
 
@@ -46,6 +54,8 @@ void ImagesLoader::NextImage(int step) {
 
     QVariantList list = LoadAnnotations();
     emit nextImageLoaded(qmlImageUrl, list);
+
+    return {qmlImageUrl, list};
 }
 
 

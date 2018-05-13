@@ -47,6 +47,8 @@ Item {
                 _y: modelData.y + yshift
                 _width: modelData.width
                 _height: modelData.height
+                xmax: img.width
+                ymax: img.height
 
                 label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
                 borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"

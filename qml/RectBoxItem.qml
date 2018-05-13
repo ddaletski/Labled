@@ -17,6 +17,11 @@ Item {
     property alias _x: drawnRect.x
     property alias _y: drawnRect.y
 
+    property int xmin: 0
+    property int xmax: 10000
+    property int ymin: 0
+    property int ymax: 10000
+
     Rectangle {
         id: drawnRect
         border.color: borderColor
@@ -43,9 +48,10 @@ Item {
         id: drawnLabel
         visible: root.showLabel
         anchors {
-            bottom: if (drawnRect.y > height) drawnRect.top
-            top: if (drawnRect.y <= height) drawnRect.bottom
-            left: drawnRect.left
+            bottom: if (drawnRect.y - contentHeight > xmin) drawnRect.top
+            top: if (drawnRect.y - contentHeight <= xmin) drawnRect.bottom
+            left: if (drawnRect.x + contentWidth < xmax) drawnRect.left
+            right: if (drawnRect.x + contentWidth >= xmax) drawnRect.right
             leftMargin: 3
             rightMargin: 3
         }

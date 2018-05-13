@@ -11,9 +11,14 @@
 class ImagesLoader : public QObject {
     Q_OBJECT
 
+public:
+    explicit ImagesLoader(QObject *parent = nullptr);
+    void ToStart();
+    void ToEnd();
+
 public slots:
     void LoadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
-    void NextImage(int step);
+    QPair<QUrl, QVariantList> NextImage(int step);
     void SaveImage(const QVariant& rects);
 
 signals:

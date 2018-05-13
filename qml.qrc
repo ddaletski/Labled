@@ -18,5 +18,6 @@
         <file>img/garbage_can.svg</file>
         <file>img/diag_cross.svg</file>
         <file>qml/SideMenu.qml</file>
+        <file>qml/Position.qml</file>
     </qresource>
 </RCC>

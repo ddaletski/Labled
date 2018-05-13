@@ -17,41 +17,6 @@ Item {
     ColumnLayout {
         anchors.fill: parent
 
-        Button {
-            id: inputDirButton
-            height: 15
-            anchors {
-                left: parent.left
-                right: parent.right
-                rightMargin: 5
-            }
-
-            text: qsTr("Choose input dir")
-
-            onClicked: indirDialog.open()
-        }
-
-        Button {
-            id: outputDirButton
-            height: 15
-
-            anchors {
-                left: parent.left
-                right: parent.right
-                rightMargin: 5
-            }
-
-            text: qsTr("Choose output dir")
-
-            onClicked: outdirDialog.open()
-        }
-
-        HorizontalLine {
-            height: 15
-            lineHeight: 1
-            Layout.fillWidth: true
-        }
-
         LabelsMenu {
             id: labelsMenu
             anchors {

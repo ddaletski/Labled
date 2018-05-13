@@ -7,6 +7,7 @@ import QtQuick.Dialogs 1.2
 Dialog {
     id: root
     property url inputDir: ""
+    property url annotationsDir: ""
     property url outputDir: ""
 
     standardButtons: StandardButton.NoButton
@@ -18,6 +19,15 @@ Dialog {
             root.inputDir = fileUrl
             mainItem.focus = true
             console.log(folder)
+        }
+    }
+
+    FileChooseDialog {
+        id: annotationsdirDialog
+
+        onAccepted: {
+            root.annotationsDir = fileUrl
+            mainItem.focus = true
         }
     }
 
@@ -58,6 +68,30 @@ Dialog {
                     onClicked: {
                         indirDialog.setFolder(root.inputDir)
                         indirDialog.open()
+                    }
+                }
+            }
+
+            Label {
+                width: 100
+                text: qsTr("Annotations dir: ")
+            }
+
+            TextField {
+                id: annotationsDirField
+                Layout.preferredWidth: 400
+                text: root.annotationsDir
+                selectByMouse: true
+            }
+
+            Image {
+                source: "/img/folder.svg"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        annotationsdirDialog.setFolder(root.annotationsDir)
+                        annotationsdirDialog.open()
                     }
                 }
             }

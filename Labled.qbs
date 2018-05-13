@@ -7,6 +7,7 @@ Project {
         Depends { name: "Qt.core" }
         Depends { name: "Qt.quick" }
         Depends { name: "Qt.xml" }
+        Depends { name: "Qt.widgets" }
 
         // Additional import path used to resolve QML modules in Qt Creator's code model
         property pathList qmlImportPaths: []
@@ -28,6 +29,8 @@ Project {
         ]
 
         files: [
+            "croptool.cpp",
+            "croptool.h",
             "imageloader.cpp",
             "imageloader.h",
             "main.cpp",
