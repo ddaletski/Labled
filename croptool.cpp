@@ -14,20 +14,31 @@ void CropTool::Crop(const QUrl &imgDir, const QUrl &annDir, const QUrl &outDir, 
 
     for(int i = 0; !_loader.IsEnd(); ++i) {
         try {
-            QPair<QUrl, QVariantList> pair = _loader.NextImage(1);
-
-            if(!pair.second.size())
+            QVariantMap map = _loader.NextImage(1);
+            if(map.empty())
                 continue;
 
-            QImage img(pair.first.toLocalFile());
+            QVariantList boxes = map["boxes"].toList();
+            QString imgPath = map["imgPath"].toString();
 
-            for(QVariant object : pair.second) {
+            if(!boxes.size())
+                continue;
+
+            QFileInfo imgFile(imgPath);
+            QImage img(imgPath);
+
+            for(QVariant object : boxes) {
                 QVariantMap obj = object.toMap();
-                QImage cropped = img.copy(obj["x"].toInt(), obj["y"].toInt(), obj["width"].toInt(), obj["height"].toInt());
 
-                QStringList filenameSplitted = pair.first.fileName().split('.');
-                QString fileName = filenameSplitted.at(0);
-                QString fileExtension = filenameSplitted.at(1);
+                int x =      obj["x"].toFloat() * img.width();
+                int y =      obj["y"].toFloat() * img.height();
+                int width =  obj["width"].toFloat() * img.width();
+                int height = obj["height"].toFloat() * img.height();
+
+                QImage cropped = img.copy(x, y, width, height);
+
+                QString fileName = imgFile.completeBaseName();
+                QString fileExtension = imgFile.suffix();
 
                 QString outname = QString(pattern)
                         .replace(QString("{name}"), fileName)

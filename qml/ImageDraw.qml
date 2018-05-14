@@ -1,4 +1,4 @@
-import QtQuick 2.7
+import QtQuick 2.5
 
 Item {
     id: root
@@ -14,21 +14,13 @@ Item {
     property var lastRect: rects[rects.length-1]
     property var labelsList: []
 
-    readonly property double xscale: img.paintedWidth / img.sourceSize.width
-    readonly property double yscale: img.paintedHeight / img.sourceSize.height
     readonly property int xshift: (img.width - img.paintedWidth) / 2
     readonly property int yshift: (img.height - img.paintedHeight) / 2
+    readonly property int drawnWidth: img.paintedWidth
+    readonly property int drawnHeight: img.paintedHeight
 
     signal rectAdded()
     signal unsavedChanges()
-
-    onHeightChanged: {
-        recalculateRectsScaled()
-    }
-
-    onWidthChanged: {
-        recalculateRectsScaled()
-    }
 
     Image {
         id: img
@@ -36,42 +28,53 @@ Item {
         anchors.fill: parent
         fillMode: Image.PreserveAspectFit
 
-        Repeater {
-            id: drawnRects
-            model: root.rects
+        Item {
+            id: drawnRectsItem
+            anchors {
+                fill: parent
+                topMargin: yshift
+                bottomMargin: yshift
+                leftMargin: xshift
+                rightMargin: xshift
+            }
+            Repeater {
+                id: drawnRects
+                model: root.rects
 
-            RectBoxItem { // object bounding box
-                showLabel: root.showLabels
-                textSize: root.labelsSize
-                _x: modelData.x + xshift
-                _y: modelData.y + yshift
-                _width: modelData.width
-                _height: modelData.height
-                xmax: img.width
-                ymax: img.height
+                RectBoxItem { // object bounding box
+                    showLabel: root.showLabels
+                    textSize: root.labelsSize
+                    _x: modelData.x * drawnWidth
+                    _y: modelData.y * drawnHeight
+                    _width: modelData.width * drawnWidth
+                    _height: modelData.height * drawnHeight
+                    xmax: drawnRectsItem.width
+                    ymax: drawnRectsItem.height
 
-                label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
-                borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
-                borderWidth: root.rectBorderWidth
-                fillColor: {
-                    var col = darkBoxes ? 0 : 1
-                    if(index == root.rects.length-1) {
-                        Qt.rgba(1 - col, col, col, 0.4)
-                    } else {
-                        Qt.rgba(col, col, col, 0.2)
+                    label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
+                    borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
+                    borderWidth: root.rectBorderWidth
+                    fillColor: {
+                        var col = darkBoxes ? 0 : 1
+                        if(index == root.rects.length-1) {
+                            Qt.rgba(1 - col, col, col, 0.4)
+                        } else {
+                            Qt.rgba(col, col, col, 0.2)
+                        }
                     }
-                }
-                textBgColor: {
-                    var col = darkBoxes ? 0 : 1
-                    Qt.rgba(col, col, col, 0.7)
-                }
+                    textBgColor: {
+                        var col = darkBoxes ? 0 : 1
+                        Qt.rgba(col, col, col, 0.7)
+                    }
 
-                textColor: darkBoxes ? "white" : "black"
+                    textColor: darkBoxes ? "white" : "black"
+                }
             }
         }
     }
 
     MouseArea {
+        id: mouseArea
         property bool create: false
 
         // info about dragged box and offsets from box topLeft to drag point
@@ -130,14 +133,18 @@ Item {
 
         onPressed: {
             root.focus = true
+            var X_ = bounded(mouse.x, 0, width)
+            var Y_ = bounded(mouse.y, 0, height)
+            var X = X_ / drawnWidth
+            var Y = Y_ / drawnHeight
 
             if(root.isSelection) {
                 create = true
-                var r = rectItemFromScaled(mouse.x, mouse.y, 0, 0, -1)
+                var r = rectItem(X, Y, 0, 0, -1)
                 root.rects.push(r)
             } else {
-                resizeInfo = root.onEdge(mouse.x, mouse.y)
-                dragInfo = root.inRect(mouse.x, mouse.y)
+                resizeInfo = root.onEdge(X, Y)
+                dragInfo = root.inRect(X, Y)
 
                 if (resizeInfo.rectIdx >= 0) {
                     //                    moveRectToBack(resizeInfo.rectIdx) // resized rect is drawn on top of the others
@@ -156,7 +163,7 @@ Item {
                 isSelection = false
                 var newRect = root.rects[root.rects.length-1]
 
-                if (newRect.width * newRect.height < 16) {
+                if (newRect.width * newRect.height * drawnHeight * drawnWidth < 16) {
                     root.rects.pop()
                     updateRects()
                 } else {
@@ -175,20 +182,26 @@ Item {
 
 
         function update(mouse) {
-            var X = bounded(mouse.x, 0, width)
-            var Y = bounded(mouse.y, 0, height)
+            var X_ = bounded(mouse.x, 0, width)
+            var Y_ = bounded(mouse.y, 0, height)
 
-            horLine.x = X
-            verLine.y = Y
+            var X = X_ / drawnWidth
+            var Y = Y_ / drawnHeight
+
+            horLine.x = X_
+            verLine.y = Y_
+
+
+            var rectObj = drawnRects.itemAt(0)
 
             if (create) {
                 var altX = false // pointer is left to selection start point
                 var altY = false //  pointer is above selection start point
                 var objRect = root.rects[root.rects.length-1]
 
-                if(objRect.baseX > mouse.x)
+                if(objRect.baseX > X)
                     altX = true
-                if(objRect.baseY > mouse.y)
+                if(objRect.baseY > Y)
                     altY = true
 
                 if(altX) {
@@ -207,7 +220,7 @@ Item {
                     objRect.y = objRect.baseY
                 }
 
-                recalculateRectsOriginal()
+                updateRects()
                 unsavedChanges()
             } else if (resizeInfo.rectIdx >= 0) {
                 var rect = root.rects[resizeInfo.rectIdx]
@@ -240,17 +253,17 @@ Item {
                     resizeInfo.hor *= -1
                 }
 
-                recalculateRectsOriginal()
+                updateRects()
                 unsavedChanges()
             } else if (dragInfo.rectIdx >= 0) {
 
                 var idx = dragInfo.rectIdx
                 var rect = root.rects[dragInfo.rectIdx]
 
-                rect.x = bounded(X - dragInfo.shiftX, 0, width-rect.width)
-                rect.y = bounded(Y - dragInfo.shiftY, 0, height-rect.height)
+                rect.x = bounded(X - dragInfo.shiftX, 0, drawnWidth-rect.width)
+                rect.y = bounded(Y - dragInfo.shiftY, 0, drawnHeight-rect.height)
 
-                recalculateRectsOriginal()
+                updateRects()
                 unsavedChanges()
             } else {
                 // set cursor according to available action
@@ -320,6 +333,8 @@ Item {
 
 
     function onEdge(X, Y) {
+        var delta = 2 / (drawnWidth + drawnHeight)
+
         var resizeInfo = {
             rectIdx: -1,
             ver: 0,
@@ -330,24 +345,24 @@ Item {
         for (var i = rects.length - 1; i >= 0 && !found; --i) {
             var r = rects[i]
 
-            if(Y >= r.y - 2 && Y <= r.y + r.height + 2) {
-                if(Math.abs(X - r.x) <= 2) {
+            if(Y >= r.y - delta && Y <= r.y + r.height + delta) {
+                if(Math.abs(X - r.x) <= delta) {
                     resizeInfo.ver = -1
                     resizeInfo.rectIdx = i
                     found = true
-                } else if (Math.abs(X - (r.x + r.width)) <= 2) {
+                } else if (Math.abs(X - (r.x + r.width)) <= delta) {
                     resizeInfo.ver = 1
                     resizeInfo.rectIdx = i
                     found = true
                 }
             }
 
-            if(X >= r.x - 2 && X <= r.x + r.width + 2) {
-                if(Math.abs(Y - r.y) <= 2) {
+            if(X >= r.x - delta && X <= r.x + r.width + delta) {
+                if(Math.abs(Y - r.y) <= delta) {
                     resizeInfo.hor = -1
                     resizeInfo.rectIdx = i
                     found = true
-                } else if (Math.abs(Y - (r.y + r.height)) <= 2) {
+                } else if (Math.abs(Y - (r.y + r.height)) <= delta) {
                     resizeInfo.hor = 1
                     resizeInfo.rectIdx = i
                     found = true
@@ -380,27 +395,7 @@ Item {
     }
 
 
-    function rectItemFromOrig (x, y, width, height, label) {
-        var rect = {
-            x: 0,
-            y: 0,
-            baseX: 0,
-            baseY: 0,
-            width: 0,
-            height: 0,
-            origX: x,
-            origY: y,
-            origWidth: width,
-            origHeight: height,
-            label: label
-        }
-
-        updateRectScaledComponent(rect)
-        return rect
-    }
-
-
-    function rectItemFromScaled (x, y, width, height, label) {
+    function rectItem (x, y, width, height, label) {
         var rect = {
             x: x,
             y: y,
@@ -408,14 +403,9 @@ Item {
             baseY: y,
             width: width,
             height: height,
-            origX: 0,
-            origY: 0,
-            origWidth: 0,
-            origHeight: 0,
             label: label
         }
 
-        updateRectOrigComponent(rect)
         return rect
     }
 
@@ -427,40 +417,5 @@ Item {
         rect.height *= yscale
         rect.baseX *= xscale
         rect.baseY *= yscale
-        updateRectOrigComponent(rect)
-    }
-
-    function recalculateRectsOriginal() {
-        for (var i in rects) {
-            updateRectOrigComponent(rects[i])
-        }
-
-        updateRects()
-    }
-
-    function recalculateRectsScaled() {
-        for (var i in rects) {
-            updateRectScaledComponent(rects[i])
-        }
-
-        updateRects()
-    }
-
-    function updateRectOrigComponent(rect) {
-        // updates original coordinates after rect resizing
-        rect.origX = rect.x / xscale
-        rect.origY = rect.y / yscale
-        rect.origWidth = rect.width / xscale
-        rect.origHeight = rect.height / yscale
-    }
-
-    function updateRectScaledComponent(rect) {
-        // updates visual (scaled to screen) coords after screen resizing
-        rect.x = rect.origX * xscale
-        rect.y = rect.origY * yscale
-        rect.baseX = rect.origX * xscale
-        rect.baseY = rect.origY * yscale
-        rect.width = rect.origWidth * xscale
-        rect.height = rect.origHeight * yscale
     }
 }

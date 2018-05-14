@@ -1,6 +1,6 @@
-import QtQuick 2.9
+import QtQuick 2.5
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts 1.2
 import "qml"
 
 
@@ -17,7 +17,7 @@ ApplicationWindow {
     property string annotationsDir: ""
     property var labelsList: []
     property alias defaultLabel: sideMenu.defaultLabel
-    property url currentImage
+    property string currentImage
     property bool unsavedChanges: false
 
 
@@ -25,7 +25,7 @@ ApplicationWindow {
 
     signal sigNextImage(int step)
     signal sigLoadImages(url imagesDir, url labelsDir)
-    signal sigSaveImage(var rects)
+    signal sigSaveImage(var annotation)
 
 
     function nextImage(step) {
@@ -57,17 +57,22 @@ ApplicationWindow {
             var r = imageArea.rects[i]
             try {
                 var newRect = {
-                    x: r.origX,
-                    y: r.origY,
-                    width: r.origWidth,
-                    height: r.origHeight,
+                    x: r.x,
+                    y: r.y,
+                    width: r.width,
+                    height: r.height,
                     label: labelsList[r.label].name
                 }
                 savedRects.push(newRect)
             } catch (e) { }
         }
 
-        sigSaveImage(savedRects)
+        var result = {
+            imgPath: currentImage,
+            boxes: savedRects
+        }
+
+        sigSaveImage(result)
     }
 
     /***************** slots ***************/
@@ -76,17 +81,17 @@ ApplicationWindow {
         sigNextImage(0)
     }
 
-    function nextImageLoaded(imageUrl, boxes)  {
+    function nextImageLoaded(annotation)  {
+        var imageUrl = annotation['imgPath']
+        var boxes = annotation['boxes']
+
         imageArea.rects = []
 
         currentImage = imageUrl
 
-        var xs = imageArea.xscale
-        var ys = imageArea.yscale
-
         for(var i in boxes) {
             var box = boxes[i]
-            imageArea.rects.push( imageArea.rectItemFromOrig(box.x, box.y, box.width, box.height, addLabel(box.label)) )
+            imageArea.rects.push( imageArea.rectItem(box.x, box.y, box.width, box.height, addLabel(box.label)) )
         }
 
         imageArea.updateRects()
@@ -275,7 +280,7 @@ ApplicationWindow {
             ImageDraw {
                 id: imageArea
 
-                src: root.currentImage
+                src: "file:" + root.currentImage
                 labelsList: root.labelsList
 
                 darkBoxes: sideMenu.darkBoxes

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         QObject::connect(&loader, SIGNAL(imagesLoaded()), rootObject, SLOT(imagesLoaded()));
 
         QObject::connect(rootObject, SIGNAL(sigNextImage(int)), &loader, SLOT(NextImage(int)));
-        QObject::connect(&loader, SIGNAL(nextImageLoaded(QVariant, QVariant)), rootObject, SLOT(nextImageLoaded(QVariant, QVariant)));
+        QObject::connect(&loader, SIGNAL(nextImageLoaded(QVariant)), rootObject, SLOT(nextImageLoaded(QVariant)));
 
         QObject::connect(rootObject, SIGNAL(sigSaveImage(QVariant)),&loader, SLOT(SaveImage(QVariant)));
     }

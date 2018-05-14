@@ -20,23 +20,31 @@ public:
     bool IsEnd();
     int Count();
 
+    QVariantMap LoadAnnotationsVoc();
+    void DumpAnnotationsVoc(const QVariantMap& json);
+
+    QVariantMap LoadAnnotationsDarknet();
+    void DumpAnnotationsDarknet(const QVariantMap& json);
+
+    QByteArray InnerToVoc(const QVariantMap& inner);
+    QVariantMap VocToInner(const QByteArray& xml);
+
+    QByteArray InnerToDarknet(const QVariantMap& inner, const QStringList& labelsList);
+    QVariantMap DarknetToInner(const QString& darknet, const QStringList& labelsList);
+
 public slots:
     void LoadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
-    QPair<QUrl, QVariantList> NextImage(int step);
-    void SaveImage(const QVariant& rects);
+    QVariantMap NextImage(int step);
+    void SaveImage(const QVariant& annotation);
 
 signals:
-    void nextImageLoaded(QVariant, QVariant);
+    void nextImageLoaded(QVariant);
     void imagesLoaded();
     void imageSaved();
 
 private:
-    QUrl _currentImage;
-    QVector<QPair<QUrl, QUrl>> _images;
+    QVector<QPair<QString, QString>> _images;
     size_t _idx;
-
-    QVariantList LoadAnnotations();
-    void DumpAnnotations(const QVariantList& json);
 };
 
 
