@@ -60,13 +60,21 @@ void ImagesLoader::LoadImages(const QUrl &imagesDir, const QUrl &annotationsDir)
     emit imagesLoaded();
 }
 
+
 QVariantMap ImagesLoader::NextImage(int step) {
     if(_images.size() == 0)
         return {};
 
     _idx = bounded<int>(_idx + step, 0, _images.size()-1);
 
-    QVariantMap result = LoadAnnotationsVoc();
+    QFile annotationFile(_images[_idx].second);
+    if(!annotationFile.open(QIODevice::ReadOnly)) {
+        return QVariantMap();
+    }
+
+    QVariantMap result;
+    result = VocToInner(annotationFile.readAll());
+
     QString qmlImageUrl = (_images[_idx].first);
     result["imgPath"] = qmlImageUrl;
 
@@ -76,43 +84,18 @@ QVariantMap ImagesLoader::NextImage(int step) {
 
 
 void ImagesLoader::SaveImage(const QVariant &annotation) {
-    DumpAnnotationsVoc(annotation.toMap());
-}
-
-
-QVariantMap ImagesLoader::LoadAnnotationsVoc() {
-    QFile xmlFile(_images[_idx].second);
-    if(!xmlFile.open(QIODevice::ReadOnly)) {
-        return QVariantMap();
-    }
-
-    return VocToInner(xmlFile.readAll());
-}
-
-
-void ImagesLoader::DumpAnnotationsVoc(const QVariantMap &json) {
     QString currentImage = _images[_idx].first;
-    QFileInfo xml_file = QFileInfo(_images[_idx].second);
+    QFileInfo annotationFileInfo = QFileInfo(_images[_idx].second);
 
-    QByteArray xml = InnerToVoc(json);
-
-    QFile xmlFile(xml_file.absoluteFilePath());
-    if(!xmlFile.open(QIODevice::WriteOnly)) {
+    QFile annotationFile(annotationFileInfo.absoluteFilePath());
+    if(!annotationFile.open(QIODevice::WriteOnly)) {
         return;
     }
+    QByteArray result = InnerToVoc(annotation.toMap());
 
-    xmlFile.write(xml, xml.size());
+    annotationFile.write(result, result.size());
 }
 
-
-void ImagesLoader::DumpAnnotationsDarknet(const QVariantMap& json) {
-
-}
-
-
-QVariantMap ImagesLoader::LoadAnnotationsDarknet() {
-
-}
 
 
 static QDomElement tag(QDomDocument& doc, const QString& tagName) {
@@ -243,6 +226,9 @@ QVariantMap ImagesLoader::VocToInner(const QByteArray& xml) {
 
 
 QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QStringList& labelsList) {
+    QByteArray result;
+    QTextStream str(&result);
+
     for(QVariant _rect : inner["boxes"].toList()) {
         QVariantMap rect = _rect.toMap();
 
@@ -254,9 +240,46 @@ QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QStringL
 
         double xcenter = xmin + 0.5 * width;
         double ycenter = xmin + 0.5 * width;
+
+        str <<  label << " "
+                << QString::number(xmin) << " "
+                << QString::number(ymin) << " "
+                << QString::number(width) << " "
+                << QString::number(height);
     }
-    return {};
+    return result;
 }
 
+
 QVariantMap ImagesLoader::DarknetToInner(const QString& darknet, const QStringList& labelsList) {
+    QString dn = darknet;
+    QTextStream str(&dn);
+
+    QVariantList boxes;
+
+    while(true) {
+        QString line_s = str.readLine();
+        QTextStream line(&line_s);
+        if(str.atEnd())
+            break;
+
+        double xmin, ymin, width, height;
+        int label;
+
+        line >> label >> xmin >> ymin >> width >> height;
+
+        QVariantMap box;
+        box["x"] = xmin;
+        box["y"] = ymin;
+        box["width"] = xmin;
+        box["height"] = xmin;
+        box["label"] = "";
+
+        boxes.push_back(box);
+    }
+
+    QVariantMap result;
+    result["boxes"] = boxes;
+
+    return result;
 }

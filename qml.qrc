@@ -19,5 +19,6 @@
         <file>img/diag_cross.svg</file>
         <file>qml/SideMenu.qml</file>
         <file>qml/Position.qml</file>
+        <file>qml/ConvertTool.qml</file>
     </qresource>
 </RCC>

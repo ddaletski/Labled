@@ -20,12 +20,6 @@ public:
     bool IsEnd();
     int Count();
 
-    QVariantMap LoadAnnotationsVoc();
-    void DumpAnnotationsVoc(const QVariantMap& json);
-
-    QVariantMap LoadAnnotationsDarknet();
-    void DumpAnnotationsDarknet(const QVariantMap& json);
-
     QByteArray InnerToVoc(const QVariantMap& inner);
     QVariantMap VocToInner(const QByteArray& xml);
 

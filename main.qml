@@ -183,6 +183,14 @@ ApplicationWindow {
     }
 
 
+    ConvertTool {
+        id: convertTool
+        objectName: "convertTool"
+
+        inputDir: root.annotationsDir
+        outputDir: root.annotationsDir
+    }
+
     menuBar: MenuBar {
         Menu {
             title: "File"
@@ -264,6 +272,13 @@ ApplicationWindow {
                 text: qsTr("Cut images from boxes")
                 onTriggered: {
                     cropTool.open()
+                }
+            }
+
+            MenuItem {
+                text: qsTr("Convert labels")
+                onTriggered: {
+                    convertTool.open()
                 }
             }
         }
