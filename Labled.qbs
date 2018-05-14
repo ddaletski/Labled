@@ -28,6 +28,8 @@ Project {
         ]
 
         files: [
+            "converttool.cpp",
+            "converttool.hpp",
             "croptool.cpp",
             "croptool.h",
             "imageloader.cpp",

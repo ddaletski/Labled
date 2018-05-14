@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QQueue>
 #include <QVector>
-#include <QUrl>
+#include <QString>
 #include <QVariantMap>
 
 
@@ -12,22 +12,31 @@ class ImagesLoader : public QObject {
     Q_OBJECT
 
 public:
-    explicit ImagesLoader(QObject *parent = nullptr);
+    enum LabelsFormat {
+        NO_FORMAT = 0,
+        VOC = 1,
+        DARKNET = 2,
+    };
+
+    ImagesLoader(QObject *parent = nullptr);
     void ToStart();
     void ToEnd();
     int Index();
     bool IsStart();
     bool IsEnd();
     int Count();
+    int Format();
+    QVector<QString> DarknetLabels();
 
-    QByteArray InnerToVoc(const QVariantMap& inner);
-    QVariantMap VocToInner(const QByteArray& xml);
+    static QByteArray InnerToVoc(const QVariantMap& inner);
+    static QVariantMap VocToInner(const QByteArray& xml);
 
-    QByteArray InnerToDarknet(const QVariantMap& inner, const QStringList& labelsList);
-    QVariantMap DarknetToInner(const QString& darknet, const QStringList& labelsList);
+    static QByteArray InnerToDarknet(const QVariantMap& inner, const QVector<QString>& labelsList);
+    static QVariantMap DarknetToInner(const QString& darknet, const QVector<QString>& labelsList);
 
 public slots:
-    void LoadImages(const QUrl& imagesDir, const QUrl& annotationsDir);
+    void LoadImagesVoc(const QString& imagesDir, const QString& annotationsDir);
+    void LoadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile);
     QVariantMap NextImage(int step);
     void SaveImage(const QVariant& annotation);
 
@@ -39,6 +48,9 @@ signals:
 private:
     QVector<QPair<QString, QString>> _images;
     size_t _idx;
+
+    LabelsFormat _format;
+    QVector<QString> _darknet_labels;
 };
 
 

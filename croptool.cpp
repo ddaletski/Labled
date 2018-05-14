@@ -5,10 +5,10 @@
 CropTool::CropTool(QObject *parent) : QObject(parent) { }
 
 
-void CropTool::Crop(const QUrl &imgDir, const QUrl &annDir, const QUrl &outDir, const QString &pattern) {
-    _loader.LoadImages(imgDir, annDir);
+void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString &outDir, const QString &pattern) {
+    _loader.LoadImagesVoc(imgDir, annDir);
     _loader.ToStart();
-    QDir outputDirectory(outDir.toLocalFile());
+    QDir outputDirectory(outDir);
 
     QMap<QString, int> namesMap;
 

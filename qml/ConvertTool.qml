@@ -8,8 +8,11 @@ Dialog {
     id: root
     property url inputDir: ""
     property url outputDir: ""
-    property string destFormat: "darknet"
-    property string srcFormat: "voc"
+    property url imgDir: ""
+    property url labelsListFile: "labels.txt"
+    property var formats: ["voc", "darknet"]
+    property int destFormat: 1
+    property int srcFormat: 0
 
     standardButtons: StandardButton.NoButton
 
@@ -32,6 +35,36 @@ Dialog {
         }
     }
 
+    FileChooseDialog {
+        id: imgdirDialog
+
+        onAccepted: {
+            root.imgDir = fileUrl
+            mainItem.focus = true
+        }
+    }
+
+    FileChooseDialog {
+        id: labelFileDialog
+        selectFolder: false
+
+        onAccepted: {
+            root.labelsListFile = fileUrl
+            mainItem.focus = true
+        }
+    }
+
+    FileChooseDialog {
+        id: labelFileSaveDialog
+        selectFolder: false
+
+        onAccepted: {
+            mainItem.focus = true
+            console.log("SAVE TO ", fileUrl)
+        }
+    }
+
+
     MessageDialog {
         id: completedDialog
         text: qsTr("Converted")
@@ -42,8 +75,39 @@ Dialog {
         id: mainItem
 
         GridLayout {
-
             columns: 3
+
+            Label {
+                width: 100
+                text: qsTr("Format: ")
+            }
+
+            Item {
+                width: row.width
+                height: row.height
+                Row {
+                    id: row
+                    ComboBox {
+                        model: formats
+                        onCurrentIndexChanged: {
+                            root.srcFormat = currentIndex
+                        }
+                    }
+
+                    Label {
+                        text: "  =>  "
+                    }
+
+                    ComboBox {
+                        model: formats
+                        onCurrentIndexChanged: {
+                            root.destFormat = currentIndex
+                        }
+                    }
+                }
+            }
+
+            Item{ width: 5; height: 5}
 
             Label {
                 width: 100
@@ -94,33 +158,52 @@ Dialog {
                 }
             }
 
+
             Label {
                 width: 100
-                text: qsTr("Pattern:")
+                text: qsTr("Darknet labels: ")
             }
 
             TextField {
-                id: patternField
+                id: labelsListField
                 Layout.preferredWidth: 400
-                placeholderText: {
-                    switch(destFormat) {
-                    case "voc":
-                        return "{name}.txt"
-                    case "darknet":
-                        return "{name}.xml"
-                    }
-                }
-                text: placeholderText
+                text: root.labelsListFile
                 selectByMouse: true
             }
 
             Image {
-                source: "/img/backspace.svg"
-
+                source: "/img/folder.svg"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        patternField.text = patternField.placeholderText
+                        labelFileDialog.open()
+                    }
+                }
+            }
+
+
+            Label {
+                width: 100
+                text: qsTr("Images dir: ")
+            }
+
+            TextField {
+                id: imgDirField
+                enabled: root.srcFormat > root.destFormat
+                Layout.preferredWidth: 400
+                text: root.imgDir
+                selectByMouse: true
+            }
+
+            Image {
+                source: "/img/folder.svg"
+                opacity: root.srcFormat > root.destFormat
+                MouseArea {
+                    enabled: root.srcFormat > root.destFormat
+                    anchors.fill: parent
+                    onClicked: {
+                        imgdirDialog.setFolder(root.imgDir)
+                        imgdirDialog.open()
                     }
                 }
             }
@@ -156,6 +239,7 @@ Dialog {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
                 onClicked: {
+                    convertToolBackend.darknetToVoc(root.inputDir, root.outputDir, root.imgDir, root.labelsListFile)
                 }
             }
             Button {

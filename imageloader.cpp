@@ -1,7 +1,7 @@
 #include "imageloader.h"
 #include <QDebug>
 #include <QDir>
-#include <QUrl>
+#include <QString>
 #include <QFileInfo>
 #include <QtXml>
 #include <QImage>
@@ -13,7 +13,9 @@ static T bounded(T val, T min_val, T max_val) {
 }
 
 
-ImagesLoader::ImagesLoader(QObject *parent) : QObject(parent) {  }
+ImagesLoader::ImagesLoader(QObject *parent) : QObject(parent) {
+    _format = LabelsFormat::NO_FORMAT;
+}
 
 void ImagesLoader::ToStart() {
     _idx = 0;
@@ -31,6 +33,14 @@ int ImagesLoader::Count() {
     return _images.size();
 }
 
+int ImagesLoader::Format() {
+    return _format;
+}
+
+QVector<QString> ImagesLoader::DarknetLabels() {
+    return _darknet_labels;
+}
+
 bool ImagesLoader::IsStart() {
     return _idx <= 0;
 }
@@ -39,21 +49,56 @@ bool ImagesLoader::IsEnd() {
     return _images.size() == 0 || (_idx >= _images.size() - 1);
 }
 
-void ImagesLoader::LoadImages(const QUrl &imagesDir, const QUrl &annotationsDir) {
-    QDir imagesDir_(imagesDir.toLocalFile());
-    QDir annotationsDir_(annotationsDir.toLocalFile());
+void ImagesLoader::LoadImagesVoc(const QString &imagesDir, const QString &annotationsDir) {
+    _format = LabelsFormat::VOC;
+
+    QDir imagesDir_(imagesDir);
+    QDir annotationsDir_(annotationsDir);
 
     QStringList images = imagesDir_.entryList(QStringList{"*.jpg", "*.png"});
-    QStringList annotations = annotationsDir_.entryList(QStringList{"*.xml"});
 
     _images.clear();
     for(auto img_name : images) {
         QString img_path = imagesDir_.absoluteFilePath(img_name);
 
         QFileInfo img_fileinfo(img_path);
-        QString xml_path = annotationsDir_.absoluteFilePath(img_fileinfo.baseName() + ".xml");
+        QString xml_path = annotationsDir_.absoluteFilePath(img_fileinfo.completeBaseName() + ".xml");
 
         _images.push_back({img_path, xml_path});
+    }
+
+    _idx = 0;
+    emit imagesLoaded();
+}
+
+
+void ImagesLoader::LoadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile) {
+    _format = LabelsFormat::DARKNET;
+
+    QFile labels_file(labelsFile);
+    if(!labels_file.open(QIODevice::ReadOnly)) {
+        return;
+    }
+
+    _darknet_labels.clear();
+    for(QByteArray line = labels_file.readLine(); line.size(); line = labels_file.readLine()) {
+        QString label(line);
+        _darknet_labels.push_back(label.trimmed());
+    }
+
+    QDir imagesDir_(imagesDir);
+    QDir annotationsDir_(annotationsDir);
+
+    QStringList images = imagesDir_.entryList(QStringList{"*.jpg", "*.png"});
+
+    _images.clear();
+    for(auto img_name : images) {
+        QString img_path = imagesDir_.absoluteFilePath(img_name);
+
+        QFileInfo img_fileinfo(img_path);
+        QString label_path = annotationsDir_.absoluteFilePath(img_fileinfo.completeBaseName() + ".txt");
+
+        _images.push_back({img_path, label_path});
     }
 
     _idx = 0;
@@ -73,10 +118,13 @@ QVariantMap ImagesLoader::NextImage(int step) {
     }
 
     QVariantMap result;
-    result = VocToInner(annotationFile.readAll());
+    if(_format == LabelsFormat::VOC)
+        result = VocToInner(annotationFile.readAll());
+    else if(_format == LabelsFormat::DARKNET)
+        result = DarknetToInner(annotationFile.readAll(), _darknet_labels);
 
-    QString qmlImageUrl = (_images[_idx].first);
-    result["imgPath"] = qmlImageUrl;
+    result["imgPath"] = _images[_idx].first;
+    result["lblPath"] = _images[_idx].second;
 
     emit nextImageLoaded(result);
     return result;
@@ -225,14 +273,14 @@ QVariantMap ImagesLoader::VocToInner(const QByteArray& xml) {
 }
 
 
-QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QStringList& labelsList) {
+QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QVector<QString>& labelsList) {
     QByteArray result;
     QTextStream str(&result);
 
     for(QVariant _rect : inner["boxes"].toList()) {
         QVariantMap rect = _rect.toMap();
 
-        QString label = rect["label"].toString();
+        int label = labelsList.indexOf(rect["label"].toString());
         double xmin = rect["x"].toDouble();
         double ymin = rect["y"].toDouble();
         double width = rect["width"].toDouble();
@@ -241,17 +289,18 @@ QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QStringL
         double xcenter = xmin + 0.5 * width;
         double ycenter = xmin + 0.5 * width;
 
-        str <<  label << " "
-                << QString::number(xmin) << " "
-                << QString::number(ymin) << " "
+        str << label << " "
+                << QString::number(xcenter) << " "
+                << QString::number(ycenter) << " "
                 << QString::number(width) << " "
-                << QString::number(height);
+                << QString::number(height) << "\n";
     }
     return result;
 }
 
 
-QVariantMap ImagesLoader::DarknetToInner(const QString& darknet, const QStringList& labelsList) {
+QVariantMap ImagesLoader::DarknetToInner(const QString& darknet, const QVector<QString>& labelsList) {
+    qDebug() << "read dn";
     QString dn = darknet;
     QTextStream str(&dn);
 
@@ -273,8 +322,9 @@ QVariantMap ImagesLoader::DarknetToInner(const QString& darknet, const QStringLi
         box["y"] = ymin;
         box["width"] = xmin;
         box["height"] = xmin;
-        box["label"] = "";
+        box["label"] = labelsList[label];
 
+        qDebug() << box;
         boxes.push_back(box);
     }
 

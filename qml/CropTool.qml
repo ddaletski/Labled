@@ -10,7 +10,6 @@ Dialog {
     property url annotationsDir: ""
     property url outputDir: ""
 
-
     standardButtons: StandardButton.NoButton
 
     FileChooseDialog {
@@ -129,11 +128,11 @@ Dialog {
 
             Label {
                 width: 100
-                text: qsTr("Pattern:")
+                text: qsTr("Template:")
             }
 
             TextField {
-                id: patternField
+                id: templateField
                 Layout.preferredWidth: 400
                 placeholderText: "{name}__{label}_{index}.{ext}"
                 text: placeholderText
@@ -146,7 +145,7 @@ Dialog {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        patternField.text = patternField.placeholderText
+                        templateField.text = templateField.placeholderText
                     }
                 }
             }
@@ -182,7 +181,7 @@ Dialog {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
                 onClicked: {
-                    cropToolBackend.Crop(root.inputDir, root.annotationsDir, root.outputDir, patternField.text)
+                    cropToolBackend.Crop(root.inputDir, root.annotationsDir, root.outputDir, templateField.text)
                 }
             }
             Button {

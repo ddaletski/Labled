@@ -7,6 +7,7 @@
 
 #include "imageloader.h"
 #include "croptool.h"
+#include "converttool.hpp"
 
 
 int main(int argc, char *argv[])
@@ -17,8 +18,13 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     CropTool cropTool;
+    ConvertTool convertTool;
+
+    convertTool.darknetToVoc("C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\out", "C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\labels.txt");
+    return app.exec();
 
     engine.rootContext()->setContextProperty("cropToolBackend", &cropTool);
+    engine.rootContext()->setContextProperty("convertToolBackend", &convertTool);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
@@ -31,7 +37,7 @@ int main(int argc, char *argv[])
 
     ImagesLoader loader;
     {
-        QObject::connect(rootObject, SIGNAL(sigLoadImages(QUrl, QUrl)), &loader, SLOT(LoadImages(QUrl, QUrl)));
+        QObject::connect(rootObject, SIGNAL(sigLoadImages(QUrl, QUrl)), &loader, SLOT(LoadImagesVoc(QUrl, QUrl)));
         QObject::connect(&loader, SIGNAL(imagesLoaded()), rootObject, SLOT(imagesLoaded()));
 
         QObject::connect(rootObject, SIGNAL(sigNextImage(int)), &loader, SLOT(NextImage(int)));
@@ -45,8 +51,6 @@ int main(int argc, char *argv[])
     if(!cropToolObject) {
         throw "Crop tool qml not loaded";
     }
-
-    //CropTool cropTool;
 
     return app.exec();
 }
