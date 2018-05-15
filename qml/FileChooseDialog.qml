@@ -18,8 +18,7 @@ FileDialog {
 
     function urlToStr(url) {
         var s = "" + url
-        s = s.replace(/^file:\/\//, "")
-        s = s.replace(/^file:/, "")
+        s = s.replace(/^file:\/\/(?:\/([A-Z]:))?/, "$1")
         return s
     }
 }
