@@ -6,10 +6,10 @@ import QtQuick.Dialogs 1.2
 
 Dialog {
     id: root
-    property url inputDir: ""
-    property url outputDir: ""
-    property url imgDir: ""
-    property url labelsListFile: "labels.txt"
+    property string inputDir: ""
+    property string outputDir: ""
+    property string imgDir: ""
+    property string labelsListFile: "labels.txt"
     property var formats: ["voc", "darknet"]
     property int destFormat: 1
     property int srcFormat: 0
@@ -20,7 +20,7 @@ Dialog {
         id: indirDialog
 
         onAccepted: {
-            root.inputDir = fileUrl
+            root.inputDir = filePath()
             mainItem.focus = true
             console.log(folder)
         }
@@ -30,7 +30,7 @@ Dialog {
         id: outdirDialog
 
         onAccepted: {
-            root.outputDir = fileUrl
+            root.outputDir = filePath()
             mainItem.focus = true
         }
     }
@@ -39,7 +39,7 @@ Dialog {
         id: imgdirDialog
 
         onAccepted: {
-            root.imgDir = fileUrl
+            root.imgDir = filePath()
             mainItem.focus = true
         }
     }
@@ -49,7 +49,7 @@ Dialog {
         selectFolder: false
 
         onAccepted: {
-            root.labelsListFile = fileUrl
+            root.labelsListFile = filePath()
             mainItem.focus = true
         }
     }
@@ -60,7 +60,7 @@ Dialog {
 
         onAccepted: {
             mainItem.focus = true
-            console.log("SAVE TO ", fileUrl)
+            console.log("SAVE TO ", filePath())
         }
     }
 

@@ -2,7 +2,7 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
-Item {
+ColumnLayout {
     id: root
 
     property alias defaultLabel: labelsMenu.defaultLabel
@@ -15,63 +15,50 @@ Item {
     signal unsavedChanges()
     signal updateLabels()
 
-    ColumnLayout {
-        anchors.fill: parent
 
-        LabelsMenu {
-            id: labelsMenu
-            anchors {
-                left: parent.left
-                right: parent.right
-                rightMargin: 5
-            }
-            Layout.fillHeight: true
-            //                        Layout.preferredHeight: bounded(0.2 * model.length, 1, 2)
-            model: root.labelsList
+    LabelsMenu {
+        id: labelsMenu
+        //                        Layout.preferredHeight: bounded(0.2 * model.length, 1, 2)
+        Layout.fillHeight: true
+        Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
-            onSigChangeColor: {
-                root.labelsList[labelIndex].color = newColor
-                root.updateLabels()
-            }
+        model: root.labelsList
 
-            onSigDeleteLabel: {
-                console.log("L: ", labelIndex)
+        onSigChangeColor: {
+            root.labelsList[labelIndex].color = newColor
+            root.updateLabels()
+        }
 
-                imageArea.rects = imageArea.rects.filter(function (r) {
-                    return r.label != labelIndex
-                })
+        onSigDeleteLabel: {
+            console.log("L: ", labelIndex)
 
-                for(var i in imageArea.rects) {
-                    if (imageArea.rects[i].label > labelIndex) {
-                        --(imageArea.rects[i].label)
-                    }
+            imageArea.rects = imageArea.rects.filter(function (r) {
+                return r.label != labelIndex
+            })
+
+            for(var i in imageArea.rects) {
+                if (imageArea.rects[i].label > labelIndex) {
+                    --(imageArea.rects[i].label)
                 }
-
-                imageArea.updateRects()
-                root.labelsList.splice(labelIndex, 1)
-                root.updateLabels()
-
-                root.unsavedChanges()
             }
+
+            imageArea.updateRects()
+            root.labelsList.splice(labelIndex, 1)
+            root.updateLabels()
+
+            root.unsavedChanges()
         }
+    }
 
-        HorizontalLine {
-            height: 15
-            lineHeight: 1
-            Layout.fillWidth: true
-        }
+    HorizontalLine {
+        Layout.fillHeight: true
+        lineHeight: 1
+    }
 
-        ConfigurationMenu {
-            id: configMenu
-            anchors {
-                left: parent.left
-                right: parent.right
-                rightMargin: 5
-            }
-            Layout.fillHeight: true
-            //                        Layout.preferredHeight: 1
-        }
+    ConfigurationMenu {
+        id: configMenu
+        Layout.fillHeight: true
+        Layout.alignment: Qt.AlignLeft | Qt.AlignBottom
+    }
 
-    } // ColumnLayout
-
-}
+} // ColumnLayout

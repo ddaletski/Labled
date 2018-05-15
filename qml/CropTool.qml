@@ -6,9 +6,9 @@ import QtQuick.Dialogs 1.2
 
 Dialog {
     id: root
-    property url inputDir: ""
-    property url annotationsDir: ""
-    property url outputDir: ""
+    property string inputDir: ""
+    property string annotationsDir: ""
+    property string outputDir: ""
 
     standardButtons: StandardButton.NoButton
 
@@ -16,7 +16,7 @@ Dialog {
         id: indirDialog
 
         onAccepted: {
-            root.inputDir = fileUrl
+            root.inputDir = filePath()
             mainItem.focus = true
             console.log(folder)
         }
@@ -26,7 +26,7 @@ Dialog {
         id: annotationsdirDialog
 
         onAccepted: {
-            root.annotationsDir = fileUrl
+            root.annotationsDir = filePath()
             mainItem.focus = true
         }
     }
@@ -35,7 +35,7 @@ Dialog {
         id: outdirDialog
 
         onAccepted: {
-            root.outputDir = fileUrl
+            root.outputDir = filePath()
             mainItem.focus = true
         }
     }
@@ -194,6 +194,5 @@ Dialog {
             }
         }
     } // column layout
-
 
 }

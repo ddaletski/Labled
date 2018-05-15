@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     CropTool cropTool;
     ConvertTool convertTool;
 
-    convertTool.darknetToVoc("C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\out", "C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\labels.txt");
-    return app.exec();
+//    convertTool.darknetToVoc("C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\out", "C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\labels.txt");
+//    return app.exec();
 
     engine.rootContext()->setContextProperty("cropToolBackend", &cropTool);
     engine.rootContext()->setContextProperty("convertToolBackend", &convertTool);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     ImagesLoader loader;
     {
-        QObject::connect(rootObject, SIGNAL(sigLoadImages(QUrl, QUrl)), &loader, SLOT(LoadImagesVoc(QUrl, QUrl)));
+        QObject::connect(rootObject, SIGNAL(sigLoadImages(QString, QString)), &loader, SLOT(LoadImagesVoc(QString, QString)));
         QObject::connect(&loader, SIGNAL(imagesLoaded()), rootObject, SLOT(imagesLoaded()));
 
         QObject::connect(rootObject, SIGNAL(sigNextImage(int)), &loader, SLOT(NextImage(int)));

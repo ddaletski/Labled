@@ -287,7 +287,7 @@ QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QVector<
         double height = rect["height"].toDouble();
 
         double xcenter = xmin + 0.5 * width;
-        double ycenter = xmin + 0.5 * width;
+        double ycenter = ymin + 0.5 * height;
 
         str << label << " "
                 << QString::number(xcenter) << " "

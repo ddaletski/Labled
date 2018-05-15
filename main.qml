@@ -24,7 +24,7 @@ ApplicationWindow {
     /***************** signals ***************/
 
     signal sigNextImage(int step)
-    signal sigLoadImages(url imagesDir, url labelsDir)
+    signal sigLoadImages(string imagesDir, string labelsDir)
     signal sigSaveImage(var annotation)
 
 
@@ -105,7 +105,7 @@ ApplicationWindow {
 
         onAccepted: {
             mainItem.focus = true
-            root.imagesDir = fileUrl
+            root.imagesDir = filePath()
             if(root.annotationsDir == "")
                 root.annotationsDir = root.imagesDir
 
@@ -123,7 +123,7 @@ ApplicationWindow {
 
         onAccepted: {
             mainItem.focus = true
-            root.annotationsDir = fileUrl
+            root.annotationsDir = filePath()
 
             root.loadImages()
         }
@@ -328,7 +328,6 @@ ApplicationWindow {
 
             SideMenu {
                 id: sideMenu
-                width: 200
                 Layout.fillHeight: true
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10

@@ -7,4 +7,19 @@ FileDialog {
     folder: shortcuts.home
     selectFolder: true
     selectMultiple: false
+
+    function filePath() {
+        return urlToStr(fileUrl)
+    }
+
+    function strToUrl(str) {
+        return "file:" + str
+    }
+
+    function urlToStr(url) {
+        var s = "" + url
+        s = s.replace(/^file:\/\//, "")
+        s = s.replace(/^file:/, "")
+        return s
+    }
 }
