@@ -6,7 +6,7 @@ ColumnLayout {
     id: root
 
     property alias defaultLabel: labelsMenu.defaultLabel
-    property alias darkBoxes: configMenu.darkBoxes
+    property alias boxesFillMode: configMenu.boxesFillMode
     property alias showLabels: configMenu.showLabels
     property alias labelsSize: configMenu.labelsSize
     property alias enableLabelsShortcuts: configMenu.enableLabelsShortcuts

@@ -8,7 +8,7 @@ Item {
     property bool showLabels: true
     property var labelsSize: 8
     property int rectBorderWidth: 1
-    property bool darkBoxes: false
+    property int boxesFillMode: 0  // 0 - auto, 1 - dark, 2 - white
 
     property var rects: []
     property var lastRect: rects[rects.length-1]
@@ -54,20 +54,47 @@ Item {
                     label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
                     borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
                     borderWidth: root.rectBorderWidth
+                    fillOpacity: 0.2
+
                     fillColor: {
-                        var col = darkBoxes ? 0 : 1
-                        if(index == root.rects.length-1) {
-                            Qt.rgba(1 - col, col, col, 0.4)
-                        } else {
-                            Qt.rgba(col, col, col, 0.2)
+                        switch(boxesFillMode) {
+                        case 0:
+                            borderColor
+                            break
+                        case 1:
+                            "white"
+                            break
+                        case 2:
+                            "black"
+                            break
                         }
                     }
                     textBgColor: {
-                        var col = darkBoxes ? 0 : 1
-                        Qt.rgba(col, col, col, 0.7)
+                        switch(boxesFillMode) {
+                        case 0:
+                            return convertToolBackend.invertColor(borderColor)
+                        case 1:
+                            Qt.rgba(1, 1, 1, 0.6)
+                            break
+                        case 2:
+                            Qt.rgba(0, 0, 0, 0.6)
+                            break
+                        }
                     }
 
-                    textColor: darkBoxes ? "white" : "black"
+                    textColor: {
+                        switch(boxesFillMode) {
+                        case 0:
+                            borderColor
+                            break
+                        case 1:
+                            "black"
+                            break
+                        case 2:
+                            "white"
+                            break
+                        }
+                    }
                 }
             }
         }

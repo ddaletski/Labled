@@ -28,6 +28,7 @@ void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString 
 
 /****************** CropWorker *****************************/
 
+
 void CropWorker::Crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern) {
     ImagesLoader _loader;
 

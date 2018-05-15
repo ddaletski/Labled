@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.2
 GridLayout {
     id: root
 
-    property alias darkBoxes: boxesSwitch.checked
+    property alias boxesFillMode: boxesSlider.value
     property alias showLabels: showLabelsSwitch.checked
     property alias labelsSize: labelsTextSizeSlider.value
     property alias enableLabelsShortcuts: enableLabelsShotcutsSwitch.checked
@@ -25,9 +25,13 @@ GridLayout {
     Label {
         text: qsTr("Dark boxes")
     }
-    Switch {
-        id: boxesSwitch
+    Slider {
+        id: boxesSlider
         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        Layout.preferredWidth: showLabelsSwitch.width
+        minimumValue: 0
+        maximumValue: 2
+        stepSize: 1
     }
 
     Label {
@@ -48,7 +52,7 @@ GridLayout {
     Slider {
         id: labelsTextSizeSlider
         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        Layout.preferredWidth: boxesSwitch.width
+        Layout.preferredWidth: showLabelsSwitch.width
 
         minimumValue: 8
         maximumValue: 64

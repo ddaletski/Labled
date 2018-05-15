@@ -10,6 +10,7 @@ Item {
     property color textBgColor: "white"
     property color textColor: "black"
     property int textSize: 8
+    property double fillOpacity: 0.2
 
     property int borderWidth: 1
     property alias _width: drawnRect.width
@@ -26,7 +27,13 @@ Item {
         id: drawnRect
         border.color: borderColor
         border.width: root.borderWidth
-        color: fillColor
+        color: "transparent"
+
+        Rectangle {
+            anchors.fill: parent
+            opacity: fillOpacity
+            color: fillColor
+        }
     }
 
     Rectangle {

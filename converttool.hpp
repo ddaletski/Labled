@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtCore>
 #include "imageloader.h"
+#include <QColor>
 
 class ConvertWorker : public QObject {
     Q_OBJECT
@@ -24,6 +25,13 @@ public:
     explicit ConvertTool(QObject *parent = nullptr);
     ~ConvertTool();
     Q_INVOKABLE void darknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath);
+    Q_INVOKABLE QColor invertColor(const QColor& color) {
+        QColor c = color.toHsl();
+        c.setHslF(0.5, 1, 1);
+        return c;
+        c.setHslF(1 - c.hslHueF(), c.hslSaturationF(), c.lightnessF());
+        return c;
+    }
 
 signals:
     void progressChanged(double progress);

@@ -298,13 +298,13 @@ ApplicationWindow {
                 src: "file:" + root.currentImage
                 labelsList: root.labelsList
 
-                darkBoxes: sideMenu.darkBoxes
                 showLabels: sideMenu.showLabels
                 labelsSize: sideMenu.labelsSize
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 rectBorderWidth: 2
+                boxesFillMode: sideMenu.boxesFillMode
 
                 onRectAdded: {
                     if(defaultLabel < 0) {
