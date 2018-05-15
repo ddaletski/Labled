@@ -27,6 +27,7 @@ public:
     int Count();
     int Format();
     QVector<QString> DarknetLabels();
+    QVector<QPair<QString, QString>> GetPaths();;
 
     static QByteArray InnerToVoc(const QVariantMap& inner);
     static QVariantMap VocToInner(const QByteArray& xml);

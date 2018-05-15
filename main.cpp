@@ -20,9 +20,6 @@ int main(int argc, char *argv[])
     CropTool cropTool;
     ConvertTool convertTool;
 
-//    convertTool.darknetToVoc("C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\out", "C:\\Users\\denis.daletski\\Dropbox\\detection\\0", "C:\\Users\\denis.daletski\\Desktop\\labels.txt");
-//    return app.exec();
-
     engine.rootContext()->setContextProperty("cropToolBackend", &cropTool);
     engine.rootContext()->setContextProperty("convertToolBackend", &convertTool);
 
@@ -46,11 +43,6 @@ int main(int argc, char *argv[])
         QObject::connect(rootObject, SIGNAL(sigSaveImage(QVariant)),&loader, SLOT(SaveImage(QVariant)));
     }
 
-
-    QObject* cropToolObject = rootObject->findChild<QObject*>("cropTool");
-    if(!cropToolObject) {
-        throw "Crop tool qml not loaded";
-    }
 
     return app.exec();
 }

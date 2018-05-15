@@ -6,15 +6,25 @@ import QtQuick.Dialogs 1.2
 
 Dialog {
     id: root
-    property string inputDir: ""
-    property string outputDir: ""
-    property string imgDir: ""
-    property string labelsListFile: "labels.txt"
+    property alias inputDir: inputDirField.text
+    property alias outputDir: outputDirField.text
+    property alias imgDir: imgDirField.text
+    property alias labelsListFile: labelsListField.text
     property var formats: ["voc", "darknet"]
     property int destFormat: 1
     property int srcFormat: 0
 
     standardButtons: StandardButton.NoButton
+
+    Connections {
+        target: convertToolBackend
+        onProgressChanged: progressBar.value = progress
+        onConvertedDarknetToVoc: {
+            progressBar.value = 0
+            completedDialog.open()
+        }
+    }
+
 
     FileChooseDialog {
         id: indirDialog
@@ -22,7 +32,6 @@ Dialog {
         onAccepted: {
             root.inputDir = filePath()
             mainItem.focus = true
-            console.log(folder)
         }
     }
 
@@ -221,18 +230,6 @@ Dialog {
                 minimumValue: 0
                 maximumValue: 1
                 value: 0
-
-                Connections {
-                    target: cropToolBackend
-                    onProgressChanged: progressBar.value = progress
-                }
-
-                onValueChanged: {
-                    if(value == 1) {
-                        completedDialog.open()
-                        value = 0
-                    }
-                }
             }
 
             Button {

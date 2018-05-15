@@ -41,6 +41,10 @@ QVector<QString> ImagesLoader::DarknetLabels() {
     return _darknet_labels;
 }
 
+QVector<QPair<QString, QString> > ImagesLoader::GetPaths() {
+    return _images;
+}
+
 bool ImagesLoader::IsStart() {
     return _idx <= 0;
 }
@@ -300,31 +304,27 @@ QByteArray ImagesLoader::InnerToDarknet(const QVariantMap& inner, const QVector<
 
 
 QVariantMap ImagesLoader::DarknetToInner(const QString& darknet, const QVector<QString>& labelsList) {
-    qDebug() << "read dn";
     QString dn = darknet;
     QTextStream str(&dn);
 
     QVariantList boxes;
 
-    while(true) {
+    while(!str.atEnd()) {
         QString line_s = str.readLine();
         QTextStream line(&line_s);
-        if(str.atEnd())
-            break;
 
-        double xmin, ymin, width, height;
+        double x, y, width, height;
         int label;
 
-        line >> label >> xmin >> ymin >> width >> height;
+        line >> label >> x >> y >> width >> height;
 
         QVariantMap box;
-        box["x"] = xmin;
-        box["y"] = ymin;
-        box["width"] = xmin;
-        box["height"] = xmin;
+        box["x"] = std::max(x-0.5*width, 0.0);
+        box["y"] = std::max(y-0.5*height, 0.0);
+        box["width"] = width;
+        box["height"] = height;
         box["label"] = labelsList[label];
 
-        qDebug() << box;
         boxes.push_back(box);
     }
 

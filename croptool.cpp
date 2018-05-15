@@ -2,10 +2,35 @@
 #include <QImage>
 
 
-CropTool::CropTool(QObject *parent) : QObject(parent) { }
+/****************** CropTool *****************************/
+
+CropTool::CropTool(QObject *parent) : QObject(parent) {
+    CropWorker* worker = new CropWorker;
+    worker->moveToThread(&_workerThread);
+
+    connect(&_workerThread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(this, &CropTool::workerRun, worker, &CropWorker::Crop);
+    connect(worker, &CropWorker::progressChanged, this, &CropTool::progressChanged);
+    connect(worker, &CropWorker::done, this, &CropTool::done);
+    _workerThread.start();
+}
+
+CropTool::~CropTool() {
+    _workerThread.quit();
+    _workerThread.wait();
+}
 
 
 void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString &outDir, const QString &pattern) {
+    emit workerRun(imgDir, annDir, outDir, pattern);
+}
+
+
+/****************** CropWorker *****************************/
+
+void CropWorker::Crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern) {
+    ImagesLoader _loader;
+
     _loader.LoadImagesVoc(imgDir, annDir);
     _loader.ToStart();
     QDir outputDirectory(outDir);
@@ -59,9 +84,9 @@ void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString 
         } catch (...) {
         }
 
-        if(i % 100 == 0)
+        if(i % 10)
             emit progressChanged((i+1.0) / _loader.Count());
     }
 
-    emit progressChanged(1);
+    emit done();
 }
