@@ -116,16 +116,17 @@ QVariantMap ImagesLoader::NextImage(int step) {
 
     _idx = bounded<int>(_idx + step, 0, _images.size()-1);
 
+    QVariantMap result;
+
     QFile annotationFile(_images[_idx].second);
     if(!annotationFile.open(QIODevice::ReadOnly)) {
-        return QVariantMap();
+        result = QVariantMap();
+    } else {
+        if(_format == LabelsFormat::VOC)
+            result = VocToInner(annotationFile.readAll());
+        else if(_format == LabelsFormat::DARKNET)
+            result = DarknetToInner(annotationFile.readAll(), _darknet_labels);
     }
-
-    QVariantMap result;
-    if(_format == LabelsFormat::VOC)
-        result = VocToInner(annotationFile.readAll());
-    else if(_format == LabelsFormat::DARKNET)
-        result = DarknetToInner(annotationFile.readAll(), _darknet_labels);
 
     result["imgPath"] = _images[_idx].first;
     result["lblPath"] = _images[_idx].second;

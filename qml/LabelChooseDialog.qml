@@ -3,24 +3,25 @@ import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.2
 
-Dialog {
+DialogWindow {
     id: root
     property alias label: textInput.text
     property var labelsList: []
     property bool enableShortcuts: false
-    width: 200
-
-    standardButtons: StandardButton.NoButton
+    _width: col.width + 10
+    _height: col.height + 6
 
     ColumnLayout {
         id: col
-        width: parent.width
+        anchors.centerIn: parent
         spacing: 10
 
         Rectangle {
             id: listViewRect
 
             height: 300
+            width: 200
+
             Layout.fillWidth: true
             visible: root.labelsList.length
 
@@ -30,7 +31,6 @@ Dialog {
             KeyNavigation.tab: textInput
 
             ListView { // list of labels to choose
-
                 id: labelsListView
                 anchors {
                     fill: parent

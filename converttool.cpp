@@ -27,6 +27,11 @@ void ConvertTool::darknetToVoc(const QString& inputDir, const QString& outputDir
     emit convertDarknetToVoc(inputDir, outputDir, imgDir, labelsListPath);
 }
 
+void ConvertTool::renameLabel(const QString& labelsDir, const QString& oldLabel, const QString& newLabel)
+{
+
+}
+
 
 /************************* ConvertWorker ***********************************/
 void ConvertWorker::convertDarknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath) {

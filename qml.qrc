@@ -20,5 +20,7 @@
         <file>qml/SideMenu.qml</file>
         <file>qml/Position.qml</file>
         <file>qml/ConvertTool.qml</file>
+        <file>qml/DialogWindow.qml</file>
+        <file>qml/LabelEditDialog.qml</file>
     </qresource>
 </RCC>

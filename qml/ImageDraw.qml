@@ -6,7 +6,7 @@ Item {
     property bool isSelection: false  // is selection in progress (new bar creation)
 
     property bool showLabels: true
-    property var labelsSize: 8
+    property int labelsSize: 8
     property int rectBorderWidth: 1
     property int boxesFillMode: 0  // 0 - auto, 1 - dark, 2 - white
 
@@ -52,9 +52,14 @@ Item {
                     ymax: drawnRectsItem.height
 
                     label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
+
                     borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
-                    borderWidth: root.rectBorderWidth
-                    fillOpacity: 0.2
+                    borderOpacity: index == root.rects.length - 1 ? 1 : 0.7
+                    borderWidth: {
+                        var w = root.rectBorderWidth
+                        index == root.rects.length - 1 ? w + 1 : w
+                    }
+                    fillOpacity: 0.1
 
                     fillColor: {
                         switch(boxesFillMode) {
@@ -72,12 +77,13 @@ Item {
                     textBgColor: {
                         switch(boxesFillMode) {
                         case 0:
-                            return convertToolBackend.invertColor(borderColor)
+                            convertToolBackend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
+                            break
                         case 1:
-                            Qt.rgba(1, 1, 1, 0.6)
+                            Qt.rgba(1, 1, 1, 0.5)
                             break
                         case 2:
-                            Qt.rgba(0, 0, 0, 0.6)
+                            Qt.rgba(0, 0, 0, 0.5)
                             break
                         }
                     }
@@ -85,7 +91,7 @@ Item {
                     textColor: {
                         switch(boxesFillMode) {
                         case 0:
-                            borderColor
+                            convertToolBackend.invertColor(borderColor)
                             break
                         case 1:
                             "black"
@@ -287,8 +293,8 @@ Item {
                 var idx = dragInfo.rectIdx
                 var rect = root.rects[dragInfo.rectIdx]
 
-                rect.x = bounded(X - dragInfo.shiftX, 0, drawnWidth-rect.width)
-                rect.y = bounded(Y - dragInfo.shiftY, 0, drawnHeight-rect.height)
+                rect.x = bounded(X - dragInfo.shiftX, 0, 1-rect.width)
+                rect.y = bounded(Y - dragInfo.shiftY, 0, 1-rect.height)
 
                 updateRects()
                 unsavedChanges()
@@ -360,7 +366,7 @@ Item {
 
 
     function onEdge(X, Y) {
-        var delta = 2 / (drawnWidth + drawnHeight)
+        var delta = 4 / (drawnWidth + drawnHeight)
 
         var resizeInfo = {
             rectIdx: -1,

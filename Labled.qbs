@@ -28,6 +28,8 @@ Project {
         ]
 
         files: [
+            "common.cpp",
+            "common.hpp",
             "converttool.cpp",
             "converttool.hpp",
             "croptool.cpp",

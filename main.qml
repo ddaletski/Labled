@@ -331,10 +331,31 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10
+                Layout.rightMargin: 10
                 labelsList: root.labelsList
 
                 onUnsavedChanges: root.unsavedChanges = true
                 onUpdateLabels: root.updateLabels()
+                onRenameLabel: {
+                    convertToolBackend.renameLabel(root.annotationsDir,
+                                                   root.labelsList[labelIndex].name,
+                                                   newName)
+
+                    if(root.labelExists(newName)) {
+                        var idx = addLabel(newName)
+
+                        for(var i in imageArea.rects) {
+                            var rect = imageArea.rects[i]
+                            if(rect.label == labelIndex)
+                                rect.label = idx
+                        }
+
+                        deleteLabel(labelIndex)
+                    } else {
+                        root.labelsList[labelIndex].name = newName
+                        updateLabels()
+                    }
+                }
             }
         }
 
@@ -347,6 +368,15 @@ ApplicationWindow {
             imageArea.updateRects()
         }
     } // mainItem
+
+
+    function labelExists(label) {
+        for(var i in labelsList) {
+            if(label == labelsList[i].name)
+                return true
+        }
+        return false
+    }
 
 
     function addLabel(label) {

@@ -5,18 +5,22 @@ Item {
 
     property bool showLabel: true
     property alias label: drawnLabel.text
+    property int textSize: 8
+
     property color borderColor: "red"
     property color fillColor: "transparent"
     property color textBgColor: "white"
     property color textColor: "black"
-    property int textSize: 8
-    property double fillOpacity: 0.2
 
+
+    property double fillOpacity: 0.2
+    property double borderOpacity: 1
     property int borderWidth: 1
-    property alias _width: drawnRect.width
-    property alias _height: drawnRect.height
-    property alias _x: drawnRect.x
-    property alias _y: drawnRect.y
+
+    property alias _width: borderRect.width
+    property alias _height: borderRect.height
+    property alias _x: borderRect.x
+    property alias _y: borderRect.y
 
     property int xmin: 0
     property int xmax: 10000
@@ -24,16 +28,21 @@ Item {
     property int ymax: 10000
 
     Rectangle {
-        id: drawnRect
+        id: borderRect
         border.color: borderColor
         border.width: root.borderWidth
         color: "transparent"
+        opacity: borderOpacity
+    }
 
-        Rectangle {
-            anchors.fill: parent
-            opacity: fillOpacity
-            color: fillColor
+    Rectangle {
+        id: fillRect
+        anchors {
+            fill: borderRect
+            margins: borderRect.border.width
         }
+        opacity: fillOpacity
+        color: fillColor
     }
 
     Rectangle {
@@ -47,7 +56,7 @@ Item {
         }
 
         color: root.textBgColor
-        border.color: drawnRect.border.color
+        border.color: borderRect.border.color
         border.width: root.borderWidth
     }
 
@@ -55,10 +64,10 @@ Item {
         id: drawnLabel
         visible: root.showLabel
         anchors {
-            bottom: if (drawnRect.y - contentHeight > xmin) drawnRect.top
-            top: if (drawnRect.y - contentHeight <= xmin) drawnRect.bottom
-            left: if (drawnRect.x + contentWidth < xmax) drawnRect.left
-            right: if (drawnRect.x + contentWidth >= xmax) drawnRect.right
+            bottom: if (borderRect.y - contentHeight > xmin) borderRect.top
+            top: if (borderRect.y - contentHeight <= xmin) borderRect.bottom
+            left: if (borderRect.x + contentWidth < xmax) borderRect.left
+            right: if (borderRect.x + contentWidth >= xmax) borderRect.right
             leftMargin: 3
             rightMargin: 3
         }

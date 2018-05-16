@@ -13,7 +13,7 @@ GridLayout {
     columns: 2
 
     Label {
-        text: qsTr("Enable label choice shortcuts")
+        text: qsTr("Label choice shortcuts:")
     }
     Switch {
         id: enableLabelsShotcutsSwitch
@@ -23,19 +23,20 @@ GridLayout {
 
 
     Label {
-        text: qsTr("Dark boxes")
+        text: qsTr("Fill mode:")
     }
     Slider {
         id: boxesSlider
         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
         Layout.preferredWidth: showLabelsSwitch.width
+        value: 2
         minimumValue: 0
         maximumValue: 2
         stepSize: 1
     }
 
     Label {
-        text: qsTr("Show box label")
+        text: qsTr("Show box label:")
     }
 
     Switch {

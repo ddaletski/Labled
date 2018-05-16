@@ -4,13 +4,14 @@ import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 
 
-Dialog {
+DialogWindow {
     id: root
     property alias inputDir: inputDirField.text
     property alias annotationsDir: annotationsDirField.text
     property alias outputDir: outputDirField.text
 
-    standardButtons: StandardButton.NoButton
+    _width: mainItem.width + 10
+    _height: mainItem.height + 6
 
     Connections {
         target: cropToolBackend
@@ -59,9 +60,10 @@ Dialog {
 
     ColumnLayout {
         id: mainItem
+        anchors.centerIn: parent
 
         GridLayout {
-
+            id: gridLayout
             columns: 3
 
             Label {

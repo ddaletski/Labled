@@ -9,6 +9,7 @@ ColumnLayout {
     property int defaultLabel: -1
     signal sigChangeColor(int labelIndex, color newColor)
     signal sigDeleteLabel(int labelIndex)
+    signal sigEditLabel(int labelIndex)
 
     ColorChooseDialog {
         id: colorDialog
@@ -30,11 +31,13 @@ ColumnLayout {
     Label {
         id: defaultLabelTitle
         text: qsTr("Default label: ") + (defaultLabel >= 0 ? model[defaultLabel].name : "")
+        Layout.preferredWidth: root.width
         clip: true
     }
 
     RowLayout {
         z: labelsList.z + 1
+        Layout.preferredWidth: root.width
 
         Label {
             id: filterTitle
@@ -59,75 +62,77 @@ ColumnLayout {
 
         delegate: Rectangle {
             width: root.width
-            height: txt.height + 10
+            height: row.height
 
             border.color: root.model[modelData].color
 
-            Text {
-                id: txt
+            RowLayout {
+                id: row
                 anchors {
                     left: parent.left
                     right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    leftMargin: 10 + height
-                    rightMargin: 10 + height
+                    leftMargin: 5
+                    rightMargin: 2
                 }
-                clip: true
-                text: root.model[modelData].name
-            }
+                anchors.verticalCenter: parent.verticalCenter
 
-            Item {
-                id: makeDefault
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    bottom: parent.bottom
-                }
-                width: height
-
-                Rectangle {
-                    anchors.centerIn: parent
-                    height: 10
+                Item {
+                    id: makeDefault
+                    height: txt.height
                     width: height
-                    radius: height / 2
-                    color: root.defaultLabel == modelData ? root.model[modelData].color : "white"
-                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        if(root.defaultLabel == modelData)
-                            root.defaultLabel = -1
-                        else
-                            root.defaultLabel = modelData
+                    Rectangle {
+                        id: makeDefaultRect
+                        anchors.centerIn: parent
+                        height: 10
+                        width: height
+                        radius: height / 2
+                        color: root.defaultLabel == modelData ? root.model[modelData].color : "white"
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if(root.defaultLabel == modelData)
+                                root.defaultLabel = -1
+                            else
+                                root.defaultLabel = modelData
+                        }
                     }
                 }
-            }
 
-            Image {
-                id: deleteLabel
-                anchors {
-                    right: parent.right
-                    rightMargin: 5
-                    verticalCenter: parent.verticalCenter
-                }
-                height: txt.height
-                width: height
-                source: "/img/diag_cross.svg"
+                Text {
+                    id: txt
+                    clip: true
+                    text: root.model[modelData].name
+                    Layout.fillWidth: true
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: root.sigDeleteLabel(modelData)
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            root.sigEditLabel(modelData)
+                        }
+                    //        colorDialog.label = modelData
+                    //        colorDialog.color = root.model[modelData].color
+                    //        colorDialog.open()
+                    }
                 }
-            }
 
-            MouseArea {
-                anchors.fill: txt
-                onClicked: {
-                    colorDialog.label = modelData
-                    colorDialog.color = root.model[modelData].color
-                    colorDialog.open()
+
+                Image {
+                    id: deleteLabel
+                    height: txt.height
+                    width: height
+
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                    source: "/img/diag_cross.svg"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.sigDeleteLabel(modelData)
+                    }
                 }
+
             }
         }
     }
