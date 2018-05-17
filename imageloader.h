@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QString>
 #include <QVariantMap>
+#include "common.hpp"
 
 
 class ImagesLoader : public QObject {
@@ -18,36 +19,84 @@ public:
         DARKNET = 2,
     };
 
+    class iterator : public std::iterator<std::bidirectional_iterator_tag, QVariantMap> {
+    public:
+        explicit iterator(ImagesLoader* loader, size_t idx) : _loader(loader), _idx(idx) {}
+        explicit iterator() : _loader(nullptr), _idx(0) {}
+
+        QVariantMap operator*() const {
+            if(_loader)
+                return (*_loader)[_idx];
+            else
+                return QVariantMap();
+        }
+
+        iterator& operator++() {
+            if(_loader)
+                _idx = Common::bounded<int>(_idx+1, 0, _loader->size()-1);
+            return (*this);
+        }
+
+        iterator& operator--() {
+            if(_loader)
+                _idx = Common::bounded<int>(_idx-1, 0, _loader->size()-1);
+            return (*this);
+        }
+
+        iterator& operator+=(int step) {
+            if(_loader)
+                _idx = Common::bounded<int>(_idx + step, 0, _loader->size()-1);
+            return (*this);
+        }
+
+        iterator& operator-=(int step) {
+            if(_loader)
+                _idx = Common::bounded<int>(_idx - step, 0, _loader->size()-1);
+            return (*this);
+        }
+
+        bool operator == (const iterator& other) {
+            return _idx == other._idx && _loader == other._loader;
+        }
+
+        bool operator != (const iterator& other) {
+            return !(*this == other);
+        }
+
+    private:
+        int _idx;
+        ImagesLoader* _loader;
+    };
+
+
     ImagesLoader(QObject *parent = nullptr);
-    void ToStart();
-    void ToEnd();
-    int Index();
-    bool IsStart();
-    bool IsEnd();
-    int Count();
+
+    iterator begin() { return iterator(this, 0); }
+    iterator end() { return iterator(this, size()); }
+    size_t size();
     int Format();
 
-    QVector<QString> DarknetLabels();
+    const QVector<QPair<QString, QString>>& paths();
+    void setPaths(const QVector<QPair<QString, QString>>& paths);
 
-    QVector<QPair<QString, QString>> GetPaths();
-    void SetPaths(const QVector<QPair<QString, QString>>& paths);
+    QVector<QString> darknetLabels();
 
-    static QByteArray InnerToVoc(const QVariantMap& inner);
-    static QVariantMap VocToInner(const QByteArray& xml);
+    static QByteArray innerToVoc(const QVariantMap& inner);
+    static QVariantMap vocToInner(const QByteArray& xml);
 
-    static QByteArray InnerToDarknet(const QVariantMap& inner, const QVector<QString>& labelsList);
-    static QVariantMap DarknetToInner(const QString& darknet, const QVector<QString>& labelsList);
+    static QByteArray innerToDarknet(const QVariantMap& inner, const QVector<QString>& labelsList);
+    static QVariantMap darknetToInner(const QString& darknet, const QVector<QString>& labelsList);
 
-    Q_INVOKABLE void LoadImagesVoc(const QString& imagesDir, const QString& annotationsDir);
-    Q_INVOKABLE void LoadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile);
+    static void saveVoc(const QVariantMap& annotation);
 
-    Q_INVOKABLE QVariantMap Next(int step);
-    Q_INVOKABLE void SaveCurrent(const QVariant& annotation);
+    void loadImagesVoc(const QString& imagesDir, const QString& annotationsDir);
+    void loadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile);
 
 private:
-    QVector<QPair<QString, QString>> _images;
-    size_t _idx;
+    QVariantMap load(const QString& annotationPath);
+    QVariantMap operator[] (size_t idx);
 
+    QVector<QPair<QString, QString>> _paths;
     LabelsFormat _format;
     QVector<QString> _darknet_labels;
 };

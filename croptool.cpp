@@ -9,7 +9,7 @@ CropTool::CropTool(QObject *parent) : QObject(parent) {
     worker->moveToThread(&_workerThread);
 
     connect(&_workerThread, &QThread::finished, worker, &QObject::deleteLater);
-    connect(this, &CropTool::workerRun, worker, &CropWorker::Crop);
+    connect(this, &CropTool::workerRun, worker, &CropWorker::crop);
     connect(worker, &CropWorker::progressChanged, this, &CropTool::progressChanged);
     connect(worker, &CropWorker::done, this, &CropTool::done);
     _workerThread.start();
@@ -21,7 +21,7 @@ CropTool::~CropTool() {
 }
 
 
-void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString &outDir, const QString &pattern) {
+void CropTool::crop(const QString &imgDir, const QString &annDir, const QString &outDir, const QString &pattern) {
     emit workerRun(imgDir, annDir, outDir, pattern);
 }
 
@@ -29,18 +29,17 @@ void CropTool::Crop(const QString &imgDir, const QString &annDir, const QString 
 /****************** CropWorker *****************************/
 
 
-void CropWorker::Crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern) {
+void CropWorker::crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern) {
     ImagesLoader _loader;
 
-    _loader.LoadImagesVoc(imgDir, annDir);
-    _loader.ToStart();
+    _loader.loadImagesVoc(imgDir, annDir);
     QDir outputDirectory(outDir);
 
     QMap<QString, int> namesMap;
 
-    for(int i = 0; !_loader.IsEnd(); ++i) {
+    int i = 0;
+    for( auto map : _loader) {
         try {
-            QVariantMap map = _loader.Next(1);
             if(map.empty())
                 continue;
 
@@ -86,7 +85,8 @@ void CropWorker::Crop(const QString& imgDir, const QString& annDir, const QStrin
         }
 
         if(i % 10)
-            emit progressChanged((i+1.0) / _loader.Count());
+            emit progressChanged((i+1.0) / _loader.size());
+        ++i;
     }
 
     emit done();

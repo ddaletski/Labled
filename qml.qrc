@@ -1,26 +1,26 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>qml/ImageDraw.qml</file>
-        <file>qml/FileChooseDialog.qml</file>
-        <file>qml/LabelChooseDialog.qml</file>
-        <file>qml/RectBoxItem.qml</file>
-        <file>qml/LabelsMenu.qml</file>
-        <file>qml/ColorChooseDialog.qml</file>
-        <file>qml/ConfigurationMenu.qml</file>
-        <file>qml/UnsavedChangesDialog.qml</file>
-        <file>qml/HorizontalLine.qml</file>
-        <file>qml/VerticalLine.qml</file>
         <file>qml/CropTool.qml</file>
         <file>img/folder.svg</file>
         <file>img/backspace.svg</file>
         <file>img/garbage_can.svg</file>
         <file>img/diag_cross.svg</file>
-        <file>qml/SideMenu.qml</file>
-        <file>qml/Position.qml</file>
         <file>qml/ConvertTool.qml</file>
-        <file>qml/DialogWindow.qml</file>
-        <file>qml/LabelEditDialog.qml</file>
+        <file>qml/common/FileChooseDialog.qml</file>
+        <file>qml/common/HorizontalLine.qml</file>
+        <file>qml/common/Position.qml</file>
+        <file>qml/common/VerticalLine.qml</file>
+        <file>qml/drawArea/ImageDraw.qml</file>
+        <file>qml/drawArea/RectBoxItem.qml</file>
+        <file>qml/mainWindow/LabelChooseDialog.qml</file>
+        <file>qml/mainWindow/UnsavedChangesDialog.qml</file>
+        <file>qml/sideMenu/ColorChooseDialog.qml</file>
+        <file>qml/sideMenu/ConfigurationMenu.qml</file>
+        <file>qml/sideMenu/LabelEditDialog.qml</file>
+        <file>qml/sideMenu/LabelsMenu.qml</file>
+        <file>qml/sideMenu/SideMenu.qml</file>
+        <file>qml/main.qml</file>
+        <file>qml/common/DialogWindow.qml</file>
     </qresource>
 </RCC>

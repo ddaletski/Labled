@@ -1,4 +1,5 @@
 import QtQuick 2.5
+import "../common"
 
 Item {
     id: root
@@ -77,7 +78,7 @@ Item {
                     textBgColor: {
                         switch(boxesFillMode) {
                         case 0:
-                            convertToolBackend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
+                            Backend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
                             break
                         case 1:
                             Qt.rgba(1, 1, 1, 0.5)
@@ -91,7 +92,7 @@ Item {
                     textColor: {
                         switch(boxesFillMode) {
                         case 0:
-                            convertToolBackend.invertColor(borderColor)
+                            Backend.invertColor(borderColor)
                             break
                         case 1:
                             "black"

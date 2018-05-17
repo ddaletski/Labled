@@ -5,7 +5,7 @@
 #include <QQmlContext>
 
 
-#include "imageloader.h"
+#include "backend.h"
 #include "croptool.h"
 #include "converttool.hpp"
 
@@ -19,13 +19,13 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     CropTool cropTool;
     ConvertTool convertTool;
-    ImagesLoader loader;
+    Backend backend;
 
-    engine.rootContext()->setContextProperty("cropToolBackend", &cropTool);
-    engine.rootContext()->setContextProperty("convertToolBackend", &convertTool);
-    engine.rootContext()->setContextProperty("imagesLoader", &loader);
+    engine.rootContext()->setContextProperty("CropToolBackend", &cropTool);
+    engine.rootContext()->setContextProperty("ConvertToolBackend", &convertTool);
+    engine.rootContext()->setContextProperty("Backend", &backend);
 
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
 
@@ -33,17 +33,6 @@ int main(int argc, char *argv[])
     if(!rootObject) {
         throw "Qml not loaded";
     }
-
-    {
-        QObject::connect(rootObject, SIGNAL(sigLoadImages(QString, QString)), &loader, SLOT(LoadImagesVoc(QString, QString)));
-        QObject::connect(&loader, SIGNAL(imagesLoaded()), rootObject, SLOT(imagesLoaded()));
-
-        QObject::connect(rootObject, SIGNAL(sigNextImage(int)), &loader, SLOT(NextImage(int)));
-        QObject::connect(&loader, SIGNAL(nextImageLoaded(QVariant)), rootObject, SLOT(nextImageLoaded(QVariant)));
-
-        QObject::connect(rootObject, SIGNAL(sigSaveImage(QVariant)),&loader, SLOT(SaveImage(QVariant)));
-    }
-
 
     return app.exec();
 }

@@ -2,16 +2,15 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.2
+import "../common"
 
 DialogWindow {
     id: root
-    property alias label: textInput.text
+    property string label: ""
     property var labelsList: []
     property bool enableShortcuts: false
-    _width: col.width + 10
-    _height: col.height + 6
 
-    ColumnLayout {
+    content: ColumnLayout {
         id: col
         anchors.centerIn: parent
         spacing: 10
@@ -81,9 +80,18 @@ DialogWindow {
         TextField { // new label field
             id: textInput
             Layout.fillWidth: true
+
             KeyNavigation.backtab: listViewRect
+            focus: true
+
             placeholderText: "label"
             selectByMouse: true
+
+            onTextChanged: root.label = text
+            Connections {
+                target: root
+                onLabelChanged: textInput.text = label
+            }
         }
 
         Row {
@@ -105,12 +113,15 @@ DialogWindow {
                 KeyNavigation.tab: listViewRect
             }
         }
-    }
 
-    onVisibleChanged: {
-        if(enableShortcuts)
-            listViewRect.focus = true
-        else
-            textInput.focus = true
+        Connections {
+            target: root
+            onVisibleChanged: {
+                if(root.enableShortcuts)
+                    listViewRect.focus = true
+                else
+                    textInput.focus = true
+            }
+        }
     }
 }

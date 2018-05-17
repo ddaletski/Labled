@@ -27,22 +27,17 @@ void ConvertTool::darknetToVoc(const QString& inputDir, const QString& outputDir
     emit convertDarknetToVoc(inputDir, outputDir, imgDir, labelsListPath);
 }
 
-void ConvertTool::renameLabel(const QString& labelsDir, const QString& oldLabel, const QString& newLabel)
-{
-
-}
-
 
 /************************* ConvertWorker ***********************************/
 void ConvertWorker::convertDarknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath) {
     ImagesLoader _loader;
-    _loader.LoadImagesDarknet(imgDir, inputDir, labelListPath);
+    _loader.loadImagesDarknet(imgDir, inputDir, labelListPath);
 
     QDir output_dir(outputDir);
 
-    for(int i = 0; !_loader.IsEnd(); ++i) {
-        QVariantMap inner = _loader.Next(1);
-        QByteArray voc = ImagesLoader::InnerToVoc(inner);
+    int i = 0;
+    for(auto inner : _loader) {
+        QByteArray voc = ImagesLoader::innerToVoc(inner);
 
         QFileInfo lblFileInfo(inner["lblPath"].toString());
 
@@ -54,8 +49,10 @@ void ConvertWorker::convertDarknetToVoc(const QString& inputDir, const QString& 
                 continue;
 
         outFile.write(voc);
+
         if(i % 10 == 0)
-            emit progressChanged((1.0 + i) / _loader.Count());
+            emit progressChanged((1.0 + i) / _loader.size());
+        ++i;
     }
 
     emit convertedDarknetToVoc();

@@ -1,8 +1,11 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
-import "qml"
 
+import "common"
+import "drawArea"
+import "sideMenu"
+import "mainWindow"
 
 ApplicationWindow {
     id: root
@@ -18,15 +21,8 @@ ApplicationWindow {
     property var labelsList: []
     property alias defaultLabel: sideMenu.defaultLabel
     property string currentImage
+    property string currentLabel
     property bool unsavedChanges: false
-
-
-    /***************** signals ***************/
-
-    signal sigNextImage(int step)
-    signal sigLoadImages(string imagesDir, string labelsDir)
-    signal sigSaveImage(var annotation)
-
 
     function nextImage(step) {
         if(unsavedChanges) {
@@ -34,7 +30,26 @@ ApplicationWindow {
             unsavedChangesDialog.mode = "next"
             unsavedChangesDialog.open()
         } else {
-            sigNextImage(step)
+            var annotation = Backend.next(step)
+
+            try {
+                var imageUrl = annotation['imgPath']
+                var labelUrl = annotation['lblPath']
+                var boxes = annotation['boxes']
+
+                imageArea.rects = []
+
+                currentImage = imageUrl
+                currentLabel = labelUrl
+
+                for(var i in boxes) {
+                    var box = boxes[i]
+                    imageArea.rects.push( imageArea.rectItem(box.x, box.y, box.width, box.height, addLabel(box.label)) )
+                }
+
+                imageArea.updateRects()
+            } catch (e) {
+            }
         }
     }
 
@@ -42,7 +57,8 @@ ApplicationWindow {
     function loadImages() {
         currentImage = ""
         imageArea.rects = []
-        sigLoadImages(root.imagesDir, root.annotationsDir)
+        Backend.loadImages(root.imagesDir, root.annotationsDir)
+        nextImage(0)
     }
 
 
@@ -69,35 +85,12 @@ ApplicationWindow {
 
         var result = {
             imgPath: currentImage,
+            lblPath: currentLabel,
             boxes: savedRects
         }
 
-        sigSaveImage(result)
+        Backend.save(result)
     }
-
-    /***************** slots ***************/
-
-    function imagesLoaded() {
-        sigNextImage(0)
-    }
-
-    function nextImageLoaded(annotation)  {
-        var imageUrl = annotation['imgPath']
-        var boxes = annotation['boxes']
-
-        imageArea.rects = []
-
-        currentImage = imageUrl
-
-        for(var i in boxes) {
-            var box = boxes[i]
-            imageArea.rects.push( imageArea.rectItem(box.x, box.y, box.width, box.height, addLabel(box.label)) )
-        }
-
-        imageArea.updateRects()
-    }
-
-    ///////////////////////////////////////////
 
 
     FileChooseDialog {
@@ -165,7 +158,7 @@ ApplicationWindow {
 
         onAccepted: {
             unsavedChanges = false
-            sigNextImage(step)
+            nextImage(step)
             mainItem.focus = true
         }
 
@@ -337,9 +330,9 @@ ApplicationWindow {
                 onUnsavedChanges: root.unsavedChanges = true
                 onUpdateLabels: root.updateLabels()
                 onRenameLabel: {
-                    convertToolBackend.renameLabel(root.annotationsDir,
-                                                   root.labelsList[labelIndex].name,
-                                                   newName)
+                    Backend.renameLabel(root.annotationsDir,
+                                        root.labelsList[labelIndex].name,
+                                        newName)
 
                     if(root.labelExists(newName)) {
                         var idx = addLabel(newName)

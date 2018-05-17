@@ -28,6 +28,8 @@ Project {
         ]
 
         files: [
+            "backend.cpp",
+            "backend.h",
             "common.cpp",
             "common.hpp",
             "converttool.cpp",

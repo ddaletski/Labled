@@ -10,7 +10,7 @@ class CropWorker : public QObject {
     Q_OBJECT
 
 public slots:
-    void Crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern);
+    void crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern);
 
 signals:
     void progressChanged(double progress);
@@ -25,7 +25,7 @@ class CropTool : public QObject
 public:
     explicit CropTool(QObject *parent = nullptr);
     ~CropTool();
-    Q_INVOKABLE void Crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern);
+    Q_INVOKABLE void crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern);
 
 signals:
     void workerRun(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern);

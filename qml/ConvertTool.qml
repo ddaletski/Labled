@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 
+import "common"
 
 DialogWindow {
     id: root
@@ -18,7 +19,7 @@ DialogWindow {
     _height: mainItem.height + 6
 
     Connections {
-        target: convertToolBackend
+        target: ConvertToolBackend
         onProgressChanged: progressBar.value = progress
         onConvertedDarknetToVoc: {
             progressBar.value = 0
@@ -238,7 +239,7 @@ DialogWindow {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
                 onClicked: {
-                    convertToolBackend.darknetToVoc(root.inputDir, root.outputDir, root.imgDir, root.labelsListFile)
+                    ConvertToolBackend.darknetToVoc(root.inputDir, root.outputDir, root.imgDir, root.labelsListFile)
                 }
             }
             Button {

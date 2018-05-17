@@ -1,16 +1,16 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
+import "../common"
 
 DialogWindow {
-    property alias text: inputField.text
-    property alias applyToAll: applyAllBox.checked
+    id: root
+
+    property string text: ""
+    property bool applyToAll: false
     property int label: -1
 
-    _width: col.width + 10
-    _height: col.height + 6
-
-    ColumnLayout {
+    content: ColumnLayout {
         id: col
         anchors.centerIn: parent
 
@@ -26,6 +26,12 @@ DialogWindow {
                 id: inputField
                 width: 200
                 selectByMouse: true
+
+                onTextChanged: root.text = text
+                Connections {
+                    target: root
+                    onTextChanged: inputField.text = text
+                }
             }
 
             Label {
@@ -35,6 +41,11 @@ DialogWindow {
             CheckBox {
                 id: applyAllBox
                 checked: false
+                onCheckedChanged: root.applyToAll = checked
+                Connections {
+                    target: root
+                    onApplyToAllChanged: applyAllBox.checked = applyToAll
+                }
             }
         }
 
