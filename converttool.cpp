@@ -41,7 +41,7 @@ void ConvertWorker::convertDarknetToVoc(const QString& inputDir, const QString& 
     QDir output_dir(outputDir);
 
     for(int i = 0; !_loader.IsEnd(); ++i) {
-        QVariantMap inner = _loader.NextImage(1);
+        QVariantMap inner = _loader.Next(1);
         QByteArray voc = ImagesLoader::InnerToVoc(inner);
 
         QFileInfo lblFileInfo(inner["lblPath"].toString());

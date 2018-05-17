@@ -19,9 +19,11 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     CropTool cropTool;
     ConvertTool convertTool;
+    ImagesLoader loader;
 
     engine.rootContext()->setContextProperty("cropToolBackend", &cropTool);
     engine.rootContext()->setContextProperty("convertToolBackend", &convertTool);
+    engine.rootContext()->setContextProperty("imagesLoader", &loader);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
@@ -32,7 +34,6 @@ int main(int argc, char *argv[])
         throw "Qml not loaded";
     }
 
-    ImagesLoader loader;
     {
         QObject::connect(rootObject, SIGNAL(sigLoadImages(QString, QString)), &loader, SLOT(LoadImagesVoc(QString, QString)));
         QObject::connect(&loader, SIGNAL(imagesLoaded()), rootObject, SLOT(imagesLoaded()));

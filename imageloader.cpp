@@ -45,6 +45,11 @@ QVector<QPair<QString, QString> > ImagesLoader::GetPaths() {
     return _images;
 }
 
+void ImagesLoader::SetPaths(const QVector<QPair<QString, QString> >& paths) {
+    _images = paths;
+    _idx = 0;
+}
+
 bool ImagesLoader::IsStart() {
     return _idx <= 0;
 }
@@ -72,7 +77,6 @@ void ImagesLoader::LoadImagesVoc(const QString &imagesDir, const QString &annota
     }
 
     _idx = 0;
-    emit imagesLoaded();
 }
 
 
@@ -106,11 +110,10 @@ void ImagesLoader::LoadImagesDarknet(const QString& imagesDir, const QString& an
     }
 
     _idx = 0;
-    emit imagesLoaded();
 }
 
 
-QVariantMap ImagesLoader::NextImage(int step) {
+QVariantMap ImagesLoader::Next(int step) {
     if(_images.size() == 0)
         return {};
 
@@ -131,12 +134,11 @@ QVariantMap ImagesLoader::NextImage(int step) {
     result["imgPath"] = _images[_idx].first;
     result["lblPath"] = _images[_idx].second;
 
-    emit nextImageLoaded(result);
     return result;
 }
 
 
-void ImagesLoader::SaveImage(const QVariant &annotation) {
+void ImagesLoader::SaveCurrent(const QVariant &annotation) {
     QString currentImage = _images[_idx].first;
     QFileInfo annotationFileInfo = QFileInfo(_images[_idx].second);
 

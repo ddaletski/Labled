@@ -40,7 +40,7 @@ void CropWorker::Crop(const QString& imgDir, const QString& annDir, const QStrin
 
     for(int i = 0; !_loader.IsEnd(); ++i) {
         try {
-            QVariantMap map = _loader.NextImage(1);
+            QVariantMap map = _loader.Next(1);
             if(map.empty())
                 continue;
 

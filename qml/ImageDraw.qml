@@ -59,7 +59,7 @@ Item {
                         var w = root.rectBorderWidth
                         index == root.rects.length - 1 ? w + 1 : w
                     }
-                    fillOpacity: 0.1
+                    fillOpacity: 0.2
 
                     fillColor: {
                         switch(boxesFillMode) {
