@@ -16,7 +16,7 @@ ColumnLayout {
 
     signal unsavedChanges()
     signal updateLabels()
-    signal renameLabel(int labelIndex, string newName)
+    signal renameLabel(int labelIndex, string newName, bool all)
 
 
     function deleteLabel(labelIndex) {
@@ -42,7 +42,7 @@ ColumnLayout {
         id: labelEditDialog
 
         onAccepted: {
-            renameLabel(label, text)
+            renameLabel(label, text, applyToAll)
             label = -1
         }
 

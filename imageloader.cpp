@@ -21,6 +21,10 @@ size_t ImagesLoader::size() {
     return _paths.size();
 }
 
+bool ImagesLoader::empty() {
+    return size() == 0;
+}
+
 int ImagesLoader::Format() {
     return _format;
 }

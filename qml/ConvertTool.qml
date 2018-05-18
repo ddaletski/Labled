@@ -15,9 +15,6 @@ DialogWindow {
     property int destFormat: 1
     property int srcFormat: 0
 
-    _width: mainItem.width + 10
-    _height: mainItem.height + 6
-
     Connections {
         target: ConvertToolBackend
         onProgressChanged: progressBar.value = progress

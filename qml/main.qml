@@ -330,23 +330,29 @@ ApplicationWindow {
                 onUnsavedChanges: root.unsavedChanges = true
                 onUpdateLabels: root.updateLabels()
                 onRenameLabel: {
-                    Backend.renameLabel(root.annotationsDir,
-                                        root.labelsList[labelIndex].name,
-                                        newName)
+                    if(all) {
+                        saveImage()
+                        Backend.renameLabel(root.annotationsDir,
+                                            root.labelsList[labelIndex].name,
+                                            newName)
+                        Backend.next(0)
+                    } else {
+                        if(root.labelExists(newName)) {
+                            var idx = addLabel(newName)
 
-                    if(root.labelExists(newName)) {
-                        var idx = addLabel(newName)
+                            for(var i in imageArea.rects) {
+                                var rect = imageArea.rects[i]
+                                if(rect.label == labelIndex)
+                                    rect.label = idx
+                            }
 
-                        for(var i in imageArea.rects) {
-                            var rect = imageArea.rects[i]
-                            if(rect.label == labelIndex)
-                                rect.label = idx
+                            deleteLabel(labelIndex)
+                        } else {
+                            root.labelsList[labelIndex].name = newName
+                            updateLabels()
                         }
 
-                        deleteLabel(labelIndex)
-                    } else {
-                        root.labelsList[labelIndex].name = newName
-                        updateLabels()
+                        unsavedChanges()
                     }
                 }
             }

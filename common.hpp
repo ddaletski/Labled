@@ -17,6 +17,11 @@ T bounded(const T& val, const T& minVal, const T& maxVal) {
         return val;
 }
 
+template<class T>
+T distance(const T& a, const T& b) {
+    return (a - b) * (a - b);
+}
+
 }
 
 #endif // COMMON_HPP

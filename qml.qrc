@@ -22,5 +22,6 @@
         <file>qml/sideMenu/SideMenu.qml</file>
         <file>qml/main.qml</file>
         <file>qml/common/DialogWindow.qml</file>
+        <file>img/color_palette.svg</file>
     </qresource>
 </RCC>

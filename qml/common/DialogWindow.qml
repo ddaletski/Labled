@@ -6,10 +6,10 @@ import QtQuick.Controls 1.4
 Window {
     id: root
     visible: false
-    property alias _width: loader.width
-    property alias _height: loader.height
     property alias content: loader.sourceComponent
 
+    readonly property int _width: loader.width + 10
+    readonly property int _height: loader.height + 6
     width: _width
     height: _height
     maximumWidth: _width
@@ -43,6 +43,7 @@ Window {
 
     Loader {
         id: loader
+        anchors.centerIn: parent
         focus: true
         Keys.onReturnPressed: accept()
         Keys.onEnterPressed: accept()

@@ -21,13 +21,19 @@ CropTool::~CropTool() {
 }
 
 
+////////////////////////////////
+/// \brief CropTool::crop
+/// \param imgDir
+/// \param annDir
+/// \param outDir
+/// \param pattern
+///
 void CropTool::crop(const QString &imgDir, const QString &annDir, const QString &outDir, const QString &pattern) {
     emit workerRun(imgDir, annDir, outDir, pattern);
 }
 
 
 /****************** CropWorker *****************************/
-
 
 void CropWorker::crop(const QString& imgDir, const QString& annDir, const QString& outDir, const QString& pattern) {
     ImagesLoader _loader;

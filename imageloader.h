@@ -20,39 +20,34 @@ public:
     };
 
     class iterator : public std::iterator<std::bidirectional_iterator_tag, QVariantMap> {
+
     public:
         explicit iterator(ImagesLoader* loader, size_t idx) : _loader(loader), _idx(idx) {}
         explicit iterator() : _loader(nullptr), _idx(0) {}
 
         QVariantMap operator*() const {
-            if(_loader)
+            if(_loader && _loader->size() > _idx)
                 return (*_loader)[_idx];
             else
                 return QVariantMap();
         }
 
         iterator& operator++() {
-            if(_loader)
-                _idx = Common::bounded<int>(_idx+1, 0, _loader->size()-1);
-            return (*this);
+            return operator += (1);
         }
 
         iterator& operator--() {
-            if(_loader)
-                _idx = Common::bounded<int>(_idx-1, 0, _loader->size()-1);
-            return (*this);
+            return operator -= (1);
         }
 
         iterator& operator+=(int step) {
-            if(_loader)
+            if(_loader && !_loader->empty())
                 _idx = Common::bounded<int>(_idx + step, 0, _loader->size()-1);
             return (*this);
         }
 
         iterator& operator-=(int step) {
-            if(_loader)
-                _idx = Common::bounded<int>(_idx - step, 0, _loader->size()-1);
-            return (*this);
+            return operator +=(-step);
         }
 
         bool operator == (const iterator& other) {
@@ -74,6 +69,7 @@ public:
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, size()); }
     size_t size();
+    bool empty();
     int Format();
 
     const QVector<QPair<QString, QString>>& paths();

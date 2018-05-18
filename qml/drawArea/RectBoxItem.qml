@@ -52,8 +52,8 @@ Item {
             fill: drawnLabel
             leftMargin: -drawnLabel.anchors.leftMargin
             rightMargin: -drawnLabel.anchors.rightMargin
-            topMargin: -1
-            bottomMargin: -1
+            topMargin: -borderWidth
+            bottomMargin: -borderWidth
         }
 
         color: root.textBgColor
@@ -65,15 +65,15 @@ Item {
         id: drawnLabel
         visible: root.showLabel
         anchors {
-            bottom: if (borderRect.y - contentHeight > xmin) borderRect.top
-            top: if (borderRect.y - contentHeight <= xmin) borderRect.bottom
+            bottom: if (borderRect.y - contentHeight > ymin) borderRect.top
+            top: if (borderRect.y - contentHeight <= ymin) borderRect.bottom
             left: if (borderRect.x + contentWidth < xmax) borderRect.left
             right: if (borderRect.x + contentWidth >= xmax) borderRect.right
-            leftMargin: 3
-            rightMargin: 3
+            leftMargin: borderWidth + 2
+            rightMargin: borderWidth + 2
         }
         color: root.textColor
-        font.bold: true
+        font.bold: false
         font.pixelSize: root.textSize
     }
 }

@@ -7,6 +7,9 @@
 #include "imageloader.h"
 #include <memory>
 
+////////////////////////////
+/// \brief The Backend class
+///
 class Backend : public QObject
 {
     Q_OBJECT

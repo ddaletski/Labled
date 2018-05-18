@@ -66,6 +66,7 @@ ColumnLayout {
             height: row.height
 
             border.color: root.model[modelData].color
+            border.width: 2
 
             RowLayout {
                 id: row
@@ -75,6 +76,7 @@ ColumnLayout {
                     leftMargin: 5
                     rightMargin: 2
                 }
+                spacing: 5
                 anchors.verticalCenter: parent.verticalCenter
 
                 Item {
@@ -85,10 +87,12 @@ ColumnLayout {
                     Rectangle {
                         id: makeDefaultRect
                         anchors.centerIn: parent
-                        height: 10
+                        height: txt.height
                         width: height
                         radius: height / 2
-                        color: root.defaultLabel == modelData ? root.model[modelData].color : "white"
+                        color: root.defaultLabel == modelData ? "gray" : "white"
+                        border.color: "gray"
+                        border.width: 2
                     }
 
                     MouseArea {
@@ -113,12 +117,29 @@ ColumnLayout {
                         onClicked: {
                             root.sigEditLabel(modelData)
                         }
-                    //        colorDialog.label = modelData
-                    //        colorDialog.color = root.model[modelData].color
-                    //        colorDialog.open()
                     }
                 }
 
+
+                Image {
+                    id: changeColor
+                    height: 10
+//                    height: 0.75 * txt.height
+                    width: height
+
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                    source: "/img/color_palette.svg"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            colorDialog.label = modelData
+                            colorDialog.color = root.model[modelData].color
+                            colorDialog.open()
+                        }
+
+                    }
+                }
 
                 Image {
                     id: deleteLabel

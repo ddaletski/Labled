@@ -1,5 +1,5 @@
 #include "backend.h"
-
+#include <QDebug>
 
 Backend::Backend(QObject *parent) : QObject(parent) {  }
 
@@ -30,8 +30,7 @@ QVariantMap Backend::next(int step)
 /// \brief Backend::save
 /// \param annotation
 ///
-void Backend::save(const QVariantMap& annotation)
-{
+void Backend::save(const QVariantMap& annotation) {
     _loader.saveVoc(annotation);
 }
 
@@ -42,9 +41,35 @@ void Backend::save(const QVariantMap& annotation)
 /// \param oldLabel
 /// \param newLabel
 ///
-void Backend::renameLabel(const QString &labelsDir, const QString &oldLabel, const QString &newLabel)
-{
+void Backend::renameLabel(const QString &labelsDir, const QString &oldLabel, const QString &newLabel) {
+    QDir labelsDir_(labelsDir);
 
+    QStringList labels = labelsDir_.entryList(QStringList{"*.xml"});
+
+    auto nameTag = [](const QString& name) {
+        return QString("<name>") + name + QString("</name>");
+    };
+
+    for(auto lblName : labels) {
+        QString lblPath = labelsDir_.absoluteFilePath(lblName);
+
+        QFile lblFile(lblPath);
+        if(!lblFile.open(QFile::ReadOnly))
+            continue;
+
+        QTextStream str(&lblFile);
+
+        QString content = str.readAll();
+        content.replace(nameTag(oldLabel), nameTag(newLabel));
+
+        lblFile.close();
+        if(!lblFile.open(QFile::WriteOnly))
+            continue;
+
+        str.reset();
+        str << content;
+        str.flush();
+    }
 }
 
 
@@ -59,6 +84,21 @@ QColor Backend::invertColor(const QColor &color) {
     QColor c = color.toRgb();
     c.setRgbF(1.0 - c.redF(), 1.0 - c.greenF(), 1.0 - c.blueF());
     c.setAlpha(color.alpha());
+
+    double distFromCenter = Common::distance(c.redF(), 0.5) +
+                            Common::distance(c.greenF(), 0.5) +
+                            Common::distance(c.blueF(), 0.5);
+
+
+    if(distFromCenter < 0.1)
+    {
+        double shiftFromCenter = c.redF() + c.greenF() + c.blueF() - 1.5;
+        double shift = shiftFromCenter < 0 ? -0.2 : 0.2;
+
+        c.setRedF(c.redF() + shift);
+        c.setGreenF(c.greenF() + shift);
+        c.setBlueF(c.blueF() + shift);
+    }
     return c;
 }
 

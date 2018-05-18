@@ -3,6 +3,10 @@
 
 /************************* ConvertTool ***********************************/
 
+//////////////////////////////////
+/// \brief ConvertTool::ConvertTool
+/// \param parent
+///
 ConvertTool::ConvertTool(QObject *parent) : QObject(parent) {
     ConvertWorker* worker = new ConvertWorker;
     worker->moveToThread(&_workerThread);
@@ -21,6 +25,13 @@ ConvertTool::~ConvertTool() {
 }
 
 
+/////////////////////////////////
+/// \brief ConvertTool::darknetToVoc
+/// \param inputDir
+/// \param outputDir
+/// \param imgDir
+/// \param labelsListPath
+///
 void ConvertTool::darknetToVoc(const QString& inputDir, const QString& outputDir,
                                const QString& imgDir, const QString& labelsListPath)
 {
@@ -29,6 +40,7 @@ void ConvertTool::darknetToVoc(const QString& inputDir, const QString& outputDir
 
 
 /************************* ConvertWorker ***********************************/
+
 void ConvertWorker::convertDarknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath) {
     ImagesLoader _loader;
     _loader.loadImagesDarknet(imgDir, inputDir, labelListPath);
