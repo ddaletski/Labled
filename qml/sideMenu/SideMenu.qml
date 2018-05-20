@@ -53,7 +53,6 @@ ColumnLayout {
 
     LabelsMenu {
         id: labelsMenu
-        //                        Layout.preferredHeight: bounded(0.2 * model.length, 1, 2)
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 

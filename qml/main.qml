@@ -284,7 +284,6 @@ ApplicationWindow {
 
     statusBar: StatusBar {
         Label {
-            anchors.fill: parent
             text: root.currentImage
         }
     }

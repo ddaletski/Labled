@@ -33,6 +33,50 @@ Item {
         opacity: 0.25
     }
 
+    MouseArea {
+        anchors.fill: flickable
+        acceptedButtons: Qt.NoButton
+        onWheel: {
+            var xmove = 0
+            var ymove = 0
+            var newScale = root.scale
+            console.log(wheel.angleDelta)
+            var mx = 0, my = 0
+
+            if(wheel.angleDelta.y > 2) {
+                if(root.scale == root.maxScale)
+                    return
+                newScale = root.scale * 1.1
+                mx = wheel.x
+                my = wheel.y
+            } else if (wheel.angleDelta.y < -2) {
+                if(root.scale == 1)
+                    return
+                newScale = root.scale / 1.1
+                mx = width / 2
+                my = height / 2
+            } else {
+                return
+            }
+
+            var xold = (mx + flickable.contentX)
+            var xnorm = xold / img.width
+            var yold = (my + flickable.contentY)
+            var ynorm = yold / img.height
+
+            root.scale = bounded(newScale, 1, root.maxScale)
+
+            var xnew = xnorm * img.width
+            var ynew = ynorm * img.height
+
+            xmove = xnew - xold
+            ymove = ynew - yold
+
+            flickable.contentX += xmove
+            flickable.contentY += ymove
+            flickable.returnToBounds()
+        }
+    }
 
     Flickable {
         id: flickable
@@ -349,41 +393,6 @@ Item {
         }
     } // Flickable
 
-    MouseArea {
-        anchors.fill: flickable
-        onWheel: {
-            var xmove = 0
-            var ymove = 0
-            var newScale = root.scale
-
-            if(wheel.angleDelta.y > 0) {
-                if(root.scale == root.maxScale)
-                    return
-                newScale = root.scale * 1.1
-            }  else {
-                if(root.scale == 1)
-                    return
-                newScale = root.scale / 1.1
-            }
-
-            var xx = (wheel.x + flickable.contentX)
-            var xxs = xx / img.width
-            var yy = (wheel.y + flickable.contentY)
-            var yys = yy / img.height
-
-            root.scale = bounded(newScale, 1, root.maxScale)
-
-            var xx2 = xxs * img.width
-            var yy2 = yys * img.height
-
-            xmove = xx2 - xx
-            ymove = yy2 - yy
-
-            flickable.contentX += xmove
-            flickable.contentY += ymove
-            flickable.returnToBounds()
-        }
-    }
 
 
     function inRect(X, Y) {
