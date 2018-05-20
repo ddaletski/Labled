@@ -187,31 +187,6 @@ Item {
             }
 
 
-            onWheel: {
-                if(wheel.angleDelta.y > 0) {
-                    if(root.scale == root.maxScale)
-                        return
-                    var xmove = 0.1 * wheel.x
-                    var ymove = 0.1 * wheel.y
-
-                    root.scale = bounded(root.scale * 1.1, 1, root.maxScale)
-                    flickable.contentX += xmove
-                    flickable.contentY += ymove
-                    flickable.returnToBounds()
-                }
-                else {
-                    if(root.scale == 1)
-                        return
-                    var xmove = 0.1 * wheel.x
-                    var ymove = 0.1 * wheel.y
-                    root.scale = bounded(root.scale * 0.9, 1, root.maxScale)
-                    flickable.contentX -= xmove
-                    flickable.contentY -= ymove
-                    flickable.returnToBounds()
-                }
-            }
-
-
             onPressed: {
                 root.focus = true
                 var X_ = bounded(mouse.x, 0, width)
@@ -372,7 +347,44 @@ Item {
                 }
             }
         }
+    } // Flickable
+
+    MouseArea {
+        anchors.fill: flickable
+        onWheel: {
+            var xmove = 0
+            var ymove = 0
+            var newScale = root.scale
+
+            if(wheel.angleDelta.y > 0) {
+                if(root.scale == root.maxScale)
+                    return
+                newScale = root.scale * 1.1
+            }  else {
+                if(root.scale == 1)
+                    return
+                newScale = root.scale / 1.1
+            }
+
+            var xx = (wheel.x + flickable.contentX)
+            var xxs = xx / img.width
+            var yy = (wheel.y + flickable.contentY)
+            var yys = yy / img.height
+
+            root.scale = bounded(newScale, 1, root.maxScale)
+
+            var xx2 = xxs * img.width
+            var yy2 = yys * img.height
+
+            xmove = xx2 - xx
+            ymove = yy2 - yy
+
+            flickable.contentX += xmove
+            flickable.contentY += ymove
+            flickable.returnToBounds()
+        }
     }
+
 
     function inRect(X, Y) {
         for(var i = rects.length-1; i >= 0; --i) {
