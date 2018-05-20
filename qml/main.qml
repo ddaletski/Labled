@@ -18,10 +18,12 @@ ApplicationWindow {
 
     property string imagesDir: ""
     property string annotationsDir: ""
+    property int imagesCount: 0
     property var labelsList: []
     property alias defaultLabel: sideMenu.defaultLabel
     property string currentImage
     property string currentLabel
+    property int currentImageIdx: 0
     property bool unsavedChanges: false
 
     function nextImage(step) {
@@ -51,6 +53,8 @@ ApplicationWindow {
             } catch (e) {
             }
         }
+        currentImageIdx = Backend.currentIdx()
+        imagesSlider.value = currentImageIdx
     }
 
 
@@ -58,6 +62,7 @@ ApplicationWindow {
         currentImage = ""
         imageArea.rects = []
         Backend.loadImages(root.imagesDir, root.annotationsDir)
+        imagesCount = Backend.imagesCount()
         nextImage(0)
     }
 
@@ -277,6 +282,13 @@ ApplicationWindow {
         }
     }
 
+    statusBar: StatusBar {
+        Label {
+            anchors.fill: parent
+            text: root.currentImage
+        }
+    }
+
     Item {
         id: mainItem
         anchors.fill: parent
@@ -284,79 +296,118 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
+            spacing: 0
 
-            ImageDraw {
-                id: imageArea
+            ColumnLayout {
+                spacing: 0
+                ImageDraw {
+                    id: imageArea
 
-                src: "file:" + root.currentImage
-                labelsList: root.labelsList
+                    src: "file:" + root.currentImage
+                    labelsList: root.labelsList
 
-                showLabels: sideMenu.showLabels
-                labelsSize: sideMenu.labelsSize
+                    showLabels: sideMenu.showLabels
+                    labelsSize: sideMenu.labelsSize
 
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                rectBorderWidth: 2
-                boxesFillMode: sideMenu.boxesFillMode
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    rectBorderWidth: 2
+                    boxesFillMode: sideMenu.boxesFillMode
 
-                onRectAdded: {
-                    if(defaultLabel < 0) {
-                        labelDialog.label = ""
-                        labelDialog.open()
-                    } else {
-                        imageArea.updateLabel(defaultLabel)
+                    onRectAdded: {
+                        if(defaultLabel < 0) {
+                            labelDialog.label = ""
+                            labelDialog.open()
+                        } else {
+                            imageArea.updateLabel(defaultLabel)
+                        }
+                    }
+
+                    onUnsavedChanges: {
+                        root.unsavedChanges = true
                     }
                 }
 
-                onUnsavedChanges: {
-                    root.unsavedChanges = true
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: childrenRect.height
+                    Slider {
+                        id: imagesSlider
+                        width: parent.width
+
+                        minimumValue: 0
+                        maximumValue: Math.max(imagesCount-1, 0)
+                        stepSize: 1
+                        onValueChanged: {
+                            if(value < 0)
+                                return
+                            if(root.currentImageIdx != value) {
+                                var diff = value - root.currentImageIdx
+                                root.currentImageIdx = value
+                                nextImage(diff)
+                            }
+                        }
+                    }
                 }
             }
 
             VerticalLine {
-                width: 1
+                width: 11
                 lineWidth: 1
                 Layout.fillHeight: true
             }
 
-            SideMenu {
-                id: sideMenu
+
+            Rectangle {
                 Layout.fillHeight: true
-                Layout.topMargin: 10
-                Layout.bottomMargin: 10
-                Layout.rightMargin: 10
-                labelsList: root.labelsList
+                width: childrenRect.width + 8
+                color: "white"
 
-                onUnsavedChanges: root.unsavedChanges = true
-                onUpdateLabels: root.updateLabels()
-                onRenameLabel: {
-                    if(all) {
-                        saveImage()
-                        Backend.renameLabel(root.annotationsDir,
-                                            root.labelsList[labelIndex].name,
-                                            newName)
-                        Backend.next(0)
-                    } else {
-                        if(root.labelExists(newName)) {
-                            var idx = addLabel(newName)
+                SideMenu {
+                    id: sideMenu
+                    anchors {
+                        top: parent.top
+                        bottom: parent.bottom
+                        margins: 8
+                    }
 
-                            for(var i in imageArea.rects) {
-                                var rect = imageArea.rects[i]
-                                if(rect.label == labelIndex)
-                                    rect.label = idx
+                    Layout.topMargin: 10
+                    Layout.bottomMargin: 10
+                    Layout.rightMargin: 10
+                    labelsList: root.labelsList
+
+                    onUnsavedChanges: root.unsavedChanges = true
+                    onUpdateLabels: root.updateLabels()
+                    onRenameLabel: {
+                        if(all) {
+                            saveImage()
+                            Backend.renameLabel(root.annotationsDir,
+                                                root.labelsList[labelIndex].name,
+                                                newName)
+                            nextImage(0)
+                        } else {
+                            if(root.labelExists(newName)) {
+                                var idx = addLabel(newName)
+
+                                for(var i in imageArea.rects) {
+                                    var rect = imageArea.rects[i]
+                                    if(rect.label == labelIndex)
+                                        rect.label = idx
+                                }
+
+                                deleteLabel(labelIndex)
+                            } else {
+                                root.labelsList[labelIndex].name = newName
+                                updateLabels()
                             }
 
-                            deleteLabel(labelIndex)
-                        } else {
-                            root.labelsList[labelIndex].name = newName
-                            updateLabels()
+                            unsavedChanges()
                         }
-
-                        unsavedChanges()
                     }
                 }
             }
-        }
+
+        } // RowLayout
 
         Keys.onEscapePressed: {
             imageArea.isSelection = false

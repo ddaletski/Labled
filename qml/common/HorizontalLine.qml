@@ -1,9 +1,9 @@
 import QtQuick 2.4
 
-Item {
+Rectangle {
     id: root
-    property alias color: rect.color
-    property alias border: rect.border
+    property alias lineColor: rect.color
+    property alias lineBorder: rect.border
     property alias lineHeight: rect.height
 
     Rectangle {

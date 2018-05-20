@@ -19,308 +19,356 @@ Item {
     readonly property int yshift: (img.height - img.paintedHeight) / 2
     readonly property int drawnWidth: img.paintedWidth
     readonly property int drawnHeight: img.paintedHeight
+    property double scale: 1.0
+    property double maxScale: 4.0
 
     signal rectAdded()
     signal unsavedChanges()
 
-    Image {
-        id: img
-        source: root.src
+    Rectangle {
         anchors.fill: parent
-        fillMode: Image.PreserveAspectFit
+        color: "white"
+        border.color: "black"
+        border.width: 1
+        opacity: 0.25
+    }
 
-        Item {
-            id: drawnRectsItem
+
+    Flickable {
+        id: flickable
+        anchors.fill: parent
+
+        contentWidth: img.width
+        contentHeight: img.height
+        interactive: !mouseArea.create && mouseArea.dragInfo.rectIdx < 0 && mouseArea.resizeInfo.rectIdx < 0
+        boundsBehavior: Flickable.StopAtBounds
+
+        Image {
+            id: img
+            source: root.src
+            width: root.width * root.scale
+            height: root.height * root.scale
+            fillMode: Image.PreserveAspectFit
+            onSourceChanged: root.scale = 1
+
+            Item {
+                id: drawnRectsItem
+                anchors {
+                    fill: parent
+                    topMargin: yshift
+                    bottomMargin: yshift
+                    leftMargin: xshift
+                    rightMargin: xshift
+                }
+                Repeater {
+                    id: drawnRects
+                    model: root.rects
+
+                    RectBoxItem { // object bounding box
+                        showLabel: root.showLabels
+                        textSize: root.labelsSize
+                        _x: modelData.x * drawnWidth
+                        _y: modelData.y * drawnHeight
+                        _width: modelData.width * drawnWidth
+                        _height: modelData.height * drawnHeight
+                        xmax: drawnRectsItem.width
+                        ymax: drawnRectsItem.height
+
+                        label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
+
+                        borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
+                        borderOpacity: index == root.rects.length - 1 ? 0.9 : 0.8
+                        borderWidth: {
+                            var w = root.rectBorderWidth
+                            index == root.rects.length - 1 ? w + 1 : w
+                        }
+                        fillOpacity: 0.2
+
+                        fillColor: {
+                            switch(boxesFillMode) {
+                            case 0:
+                                borderColor
+                                break
+                            case 1:
+                                "white"
+                                break
+                            case 2:
+                                "black"
+                                break
+                            }
+                        }
+                        textBgColor: {
+                            switch(boxesFillMode) {
+                            case 0:
+                                Backend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
+                                break
+                            case 1:
+                                Qt.rgba(1, 1, 1, 0.5)
+                                break
+                            case 2:
+                                Qt.rgba(0, 0, 0, 0.5)
+                                break
+                            }
+                        }
+
+                        textColor: {
+                            switch(boxesFillMode) {
+                            case 0:
+                                Backend.invertColor(borderColor)
+                                break
+                            case 1:
+                                "black"
+                                break
+                            case 2:
+                                "white"
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        MouseArea {
+            id: mouseArea
+            property bool create: false
+
+            // info about dragged box and offsets from box topLeft to drag point
+            property var dragInfo: {
+                rectIdx: -1
+                shiftX: 0
+                shiftY: 0
+            }
+
+            // info about resized box and currently resized edge
+            property var resizeInfo: {
+                rectIdx: -1
+                ver: 0  // -1 is left, 1 is right
+                hor: 0  // -1 is top, 1 is bottom
+            }
+
             anchors {
-                fill: parent
+                fill: img
                 topMargin: yshift
                 bottomMargin: yshift
                 leftMargin: xshift
                 rightMargin: xshift
             }
-            Repeater {
-                id: drawnRects
-                model: root.rects
+            hoverEnabled: true
 
-                RectBoxItem { // object bounding box
-                    showLabel: root.showLabels
-                    textSize: root.labelsSize
-                    _x: modelData.x * drawnWidth
-                    _y: modelData.y * drawnHeight
-                    _width: modelData.width * drawnWidth
-                    _height: modelData.height * drawnHeight
-                    xmax: drawnRectsItem.width
-                    ymax: drawnRectsItem.height
+            Rectangle {  // horizontal line through pointer
+                id: horLine
+                visible: root.isSelection && !parent.create
 
-                    label: modelData.label >= 0 ? labelsList[modelData.label].name : ""
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
 
-                    borderColor: modelData.label >= 0 ? labelsList[modelData.label].color : "red"
-                    borderOpacity: index == root.rects.length - 1 ? 1 : 0.7
-                    borderWidth: {
-                        var w = root.rectBorderWidth
-                        index == root.rects.length - 1 ? w + 1 : w
-                    }
-                    fillOpacity: 0.2
+                y: parent.mouseY
+                height: 1
 
-                    fillColor: {
-                        switch(boxesFillMode) {
-                        case 0:
-                            borderColor
-                            break
-                        case 1:
-                            "white"
-                            break
-                        case 2:
-                            "black"
-                            break
-                        }
-                    }
-                    textBgColor: {
-                        switch(boxesFillMode) {
-                        case 0:
-                            Backend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
-                            break
-                        case 1:
-                            Qt.rgba(1, 1, 1, 0.5)
-                            break
-                        case 2:
-                            Qt.rgba(0, 0, 0, 0.5)
-                            break
-                        }
-                    }
+                color: "black"
+            }
 
-                    textColor: {
-                        switch(boxesFillMode) {
-                        case 0:
-                            Backend.invertColor(borderColor)
-                            break
-                        case 1:
-                            "black"
-                            break
-                        case 2:
-                            "white"
-                            break
-                        }
-                    }
+            Rectangle { // vertical line through pointer
+                id: verLine
+                visible: root.isSelection && !parent.create
+
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                }
+
+                x: parent.mouseX
+                width: 1
+
+                color: "black"
+            }
+
+
+            onWheel: {
+                if(wheel.angleDelta.y > 0) {
+                    if(root.scale == root.maxScale)
+                        return
+                    var xmove = 0.1 * wheel.x
+                    var ymove = 0.1 * wheel.y
+
+                    root.scale = bounded(root.scale * 1.1, 1, root.maxScale)
+                    flickable.contentX += xmove
+                    flickable.contentY += ymove
+                    flickable.returnToBounds()
+                }
+                else {
+                    if(root.scale == 1)
+                        return
+                    var xmove = 0.1 * wheel.x
+                    var ymove = 0.1 * wheel.y
+                    root.scale = bounded(root.scale * 0.9, 1, root.maxScale)
+                    flickable.contentX -= xmove
+                    flickable.contentY -= ymove
+                    flickable.returnToBounds()
                 }
             }
-        }
-    }
 
-    MouseArea {
-        id: mouseArea
-        property bool create: false
 
-        // info about dragged box and offsets from box topLeft to drag point
-        property var dragInfo: {
-            rectIdx: -1
-            shiftX: 0
-            shiftY: 0
-        }
+            onPressed: {
+                root.focus = true
+                var X_ = bounded(mouse.x, 0, width)
+                var Y_ = bounded(mouse.y, 0, height)
+                var X = X_ / drawnWidth
+                var Y = Y_ / drawnHeight
 
-        // info about resized box and currently resized edge
-        property var resizeInfo: {
-            rectIdx: -1
-            ver: 0  // -1 is left, 1 is right
-            hor: 0  // -1 is top, 1 is bottom
-        }
+                if(root.isSelection) {
+                    create = true
+                    var r = rectItem(X, Y, 0, 0, -1)
+                    root.rects.push(r)
+                } else {
+                    resizeInfo = root.onEdge(X, Y)
+                    dragInfo = root.inRect(X, Y)
 
-        anchors {
-            fill: img
-            topMargin: yshift
-            bottomMargin: yshift
-            leftMargin: xshift
-            rightMargin: xshift
-        }
-        hoverEnabled: true
-
-        Rectangle {  // horizontal line through pointer
-            id: horLine
-            visible: root.isSelection && !parent.create
-
-            anchors {
-                left: parent.left
-                right: parent.right
+                    if (resizeInfo.rectIdx >= 0) {
+                        //                    moveRectToBack(resizeInfo.rectIdx) // resized rect is drawn on top of the others
+                        //                    resizeInfo.rectIdx = root.rects.length - 1
+                    } else if (dragInfo.rectIdx >= 0) {
+                        moveRectToBack(dragInfo.rectIdx) // dragged rect is drawn on top of the others
+                        dragInfo.rectIdx = root.rects.length - 1
+                    }
+                }
+                update(mouse)
             }
 
-            y: parent.mouseY
-            height: 1
+            onReleased: {
+                if(root.isSelection) {
+                    create = false
+                    isSelection = false
+                    var newRect = root.rects[root.rects.length-1]
 
-            color: "black"
-        }
-
-        Rectangle { // vertical line through pointer
-            id: verLine
-            visible: root.isSelection && !parent.create
-
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-            }
-
-            x: parent.mouseX
-            width: 1
-
-            color: "black"
-        }
-
-
-        onPressed: {
-            root.focus = true
-            var X_ = bounded(mouse.x, 0, width)
-            var Y_ = bounded(mouse.y, 0, height)
-            var X = X_ / drawnWidth
-            var Y = Y_ / drawnHeight
-
-            if(root.isSelection) {
-                create = true
-                var r = rectItem(X, Y, 0, 0, -1)
-                root.rects.push(r)
-            } else {
-                resizeInfo = root.onEdge(X, Y)
-                dragInfo = root.inRect(X, Y)
-
-                if (resizeInfo.rectIdx >= 0) {
-                    //                    moveRectToBack(resizeInfo.rectIdx) // resized rect is drawn on top of the others
-                    //                    resizeInfo.rectIdx = root.rects.length - 1
-                } else if (dragInfo.rectIdx >= 0) {
-                    moveRectToBack(dragInfo.rectIdx) // dragged rect is drawn on top of the others
-                    dragInfo.rectIdx = root.rects.length - 1
+                    if (newRect.width * newRect.height * drawnHeight * drawnWidth < 16) {
+                        root.rects.pop()
+                        updateRects()
+                    } else {
+                        root.rectAdded()  // signal about new rect
+                        unsavedChanges()
+                    }
+                } else {
+                    resizeInfo.rectIdx = -1
+                    dragInfo.rectIdx = -1
                 }
             }
-            update(mouse)
-        }
 
-        onReleased: {
-            if(root.isSelection) {
-                create = false
-                isSelection = false
-                var newRect = root.rects[root.rects.length-1]
+            onPositionChanged: {
+                update(mouse)
+            }
 
-                if (newRect.width * newRect.height * drawnHeight * drawnWidth < 16) {
-                    root.rects.pop()
+
+            function update(mouse) {
+                var X_ = bounded(mouse.x, 0, width)
+                var Y_ = bounded(mouse.y, 0, height)
+
+                var X = X_ / drawnWidth
+                var Y = Y_ / drawnHeight
+
+                horLine.x = X_
+                verLine.y = Y_
+
+
+                var rectObj = drawnRects.itemAt(0)
+
+                if (create) {
+                    var altX = false // pointer is left to selection start point
+                    var altY = false //  pointer is above selection start point
+                    var objRect = root.rects[root.rects.length-1]
+
+                    if(objRect.baseX > X)
+                        altX = true
+                    if(objRect.baseY > Y)
+                        altY = true
+
+                    if(altX) {
+                        objRect.x = X
+                        objRect.width = objRect.baseX - X
+                    } else {
+                        objRect.width = X - objRect.x
+                        objRect.x = objRect.baseX
+                    }
+
+                    if(altY) {
+                        objRect.y = Y
+                        objRect.height = objRect.baseY - Y
+                    } else {
+                        objRect.height = Y - objRect.y
+                        objRect.y = objRect.baseY
+                    }
+
                     updateRects()
-                } else {
-                    root.rectAdded()  // signal about new rect
                     unsavedChanges()
-                }
-            } else {
-                resizeInfo.rectIdx = -1
-                dragInfo.rectIdx = -1
-            }
-        }
+                } else if (resizeInfo.rectIdx >= 0) {
+                    var rect = root.rects[resizeInfo.rectIdx]
+                    var h = resizeInfo.hor
+                    var v = resizeInfo.ver
 
-        onPositionChanged: {
-            update(mouse)
-        }
+                    if (v == -1) {
+                        rect.width -= (X - rect.x)
+                        rect.x = X
+                    } else if (v == 1) {
+                        rect.width = X - rect.x
+                    }
 
+                    if (h == -1) {
+                        rect.height -= (Y - rect.y)
+                        rect.y = Y
+                    } else if (h == 1) {
+                        rect.height = Y - rect.y
+                    }
 
-        function update(mouse) {
-            var X_ = bounded(mouse.x, 0, width)
-            var Y_ = bounded(mouse.y, 0, height)
+                    if (rect.width < 0) {
+                        rect.x += rect.width
+                        rect.width *= -1
+                        resizeInfo.ver *= -1
+                    }
 
-            var X = X_ / drawnWidth
-            var Y = Y_ / drawnHeight
+                    if (rect.height < 0) {
+                        rect.y += rect.height
+                        rect.height *= -1
+                        resizeInfo.hor *= -1
+                    }
 
-            horLine.x = X_
-            verLine.y = Y_
+                    updateRects()
+                    unsavedChanges()
+                } else if (dragInfo.rectIdx >= 0) {
 
+                    var idx = dragInfo.rectIdx
+                    var rect = root.rects[dragInfo.rectIdx]
 
-            var rectObj = drawnRects.itemAt(0)
+                    rect.x = bounded(X - dragInfo.shiftX, 0, 1-rect.width)
+                    rect.y = bounded(Y - dragInfo.shiftY, 0, 1-rect.height)
 
-            if (create) {
-                var altX = false // pointer is left to selection start point
-                var altY = false //  pointer is above selection start point
-                var objRect = root.rects[root.rects.length-1]
-
-                if(objRect.baseX > X)
-                    altX = true
-                if(objRect.baseY > Y)
-                    altY = true
-
-                if(altX) {
-                    objRect.x = X
-                    objRect.width = objRect.baseX - X
+                    updateRects()
+                    unsavedChanges()
                 } else {
-                    objRect.width = X - objRect.x
-                    objRect.x = objRect.baseX
-                }
+                    // set cursor according to available action
 
-                if(altY) {
-                    objRect.y = Y
-                    objRect.height = objRect.baseY - Y
-                } else {
-                    objRect.height = Y - objRect.y
-                    objRect.y = objRect.baseY
-                }
+                    if(isSelection) {
+                        cursorShape = Qt.ArrowCursor
+                        return
+                    }
 
-                updateRects()
-                unsavedChanges()
-            } else if (resizeInfo.rectIdx >= 0) {
-                var rect = root.rects[resizeInfo.rectIdx]
-                var h = resizeInfo.hor
-                var v = resizeInfo.ver
+                    var dinfo = inRect(X, Y)
+                    var rinfo = onEdge(X, Y)
 
-                if (v == -1) {
-                    rect.width -= (X - rect.x)
-                    rect.x = X
-                } else if (v == 1) {
-                    rect.width = X - rect.x
-                }
-
-                if (h == -1) {
-                    rect.height -= (Y - rect.y)
-                    rect.y = Y
-                } else if (h == 1) {
-                    rect.height = Y - rect.y
-                }
-
-                if (rect.width < 0) {
-                    rect.x += rect.width
-                    rect.width *= -1
-                    resizeInfo.ver *= -1
-                }
-
-                if (rect.height < 0) {
-                    rect.y += rect.height
-                    rect.height *= -1
-                    resizeInfo.hor *= -1
-                }
-
-                updateRects()
-                unsavedChanges()
-            } else if (dragInfo.rectIdx >= 0) {
-
-                var idx = dragInfo.rectIdx
-                var rect = root.rects[dragInfo.rectIdx]
-
-                rect.x = bounded(X - dragInfo.shiftX, 0, 1-rect.width)
-                rect.y = bounded(Y - dragInfo.shiftY, 0, 1-rect.height)
-
-                updateRects()
-                unsavedChanges()
-            } else {
-                // set cursor according to available action
-
-                if(isSelection) {
-                    cursorShape = Qt.ArrowCursor
-                    return
-                }
-
-                var dinfo = inRect(X, Y)
-                var rinfo = onEdge(X, Y)
-
-                if (rinfo.rectIdx >= 0) {
-                    if (rinfo.hor && rinfo.ver)
-                        cursorShape = Qt.SizeAllCursor
-                    else if (rinfo.hor)
-                        cursorShape = Qt.SizeVerCursor
-                    else
-                        cursorShape = Qt.SizeHorCursor
-                } else if (dinfo.rectIdx >= 0) {
-                    cursorShape = Qt.DragMoveCursor
-                } else {
-                    cursorShape = Qt.ArrowCursor
+                    if (rinfo.rectIdx >= 0) {
+                        if (rinfo.hor && rinfo.ver)
+                            cursorShape = Qt.SizeAllCursor
+                        else if (rinfo.hor)
+                            cursorShape = Qt.SizeVerCursor
+                        else
+                            cursorShape = Qt.SizeHorCursor
+                    } else if (dinfo.rectIdx >= 0) {
+                        cursorShape = Qt.DragMoveCursor
+                    } else {
+                        cursorShape = Qt.ArrowCursor
+                    }
                 }
             }
         }

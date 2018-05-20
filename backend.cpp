@@ -12,6 +12,7 @@ void Backend::loadImages(const QString &imgPath, const QString &lblPath)
 {
    _loader.loadImagesVoc(imgPath, lblPath);
    _iterator = _loader.begin();
+   _curIdx = 0;
 }
 
 //////////////////////////////////
@@ -21,6 +22,7 @@ void Backend::loadImages(const QString &imgPath, const QString &lblPath)
 ///
 QVariantMap Backend::next(int step)
 {
+    _curIdx = Common::bounded<int>(_curIdx + step, 0, _loader.size()-1);
     _iterator += step;
     QVariantMap res = *_iterator;
     return res;
@@ -32,6 +34,22 @@ QVariantMap Backend::next(int step)
 ///
 void Backend::save(const QVariantMap& annotation) {
     _loader.saveVoc(annotation);
+}
+
+/////////////////////////////////
+/// \brief Backend::imagesCount
+/// \return
+///
+int Backend::imagesCount() {
+    return _loader.size();
+}
+
+//////////////////////////
+/// \brief Backend::currentIdx
+/// \return
+///
+int Backend::currentIdx() {
+    return _curIdx;
 }
 
 

@@ -19,6 +19,8 @@ public:
     Q_INVOKABLE void loadImages(const QString& imgPath, const QString& lblPath);
     Q_INVOKABLE QVariantMap next(int step);
     Q_INVOKABLE void save(const QVariantMap& annotation);
+    Q_INVOKABLE int imagesCount();
+    Q_INVOKABLE int currentIdx();
 
     Q_INVOKABLE void renameLabel(const QString& labelsDir, const QString& oldLabel, const QString& newLabel);
 
@@ -29,6 +31,7 @@ public:
 private:
     ImagesLoader _loader;
     ImagesLoader::iterator _iterator;
+    int _curIdx;
 };
 
 #endif // BACKEND_H
