@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Labled</Name>
+    <Version>1.0</Version>
+    <Title>Labled</Title>
+    <Publisher>Denis Daletski</Publisher>
+    <StartMenuDir>Labled</StartMenuDir>
+    <TargetDir>@rootDir@labled</TargetDir>
+</Installer>

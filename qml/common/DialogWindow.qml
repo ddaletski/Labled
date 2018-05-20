@@ -32,13 +32,13 @@ Window {
     }
 
     function accept() {
-        accepted()
         close()
+        accepted()
     }
 
     function reject() {
-        rejected()
         close()
+        rejected()
     }
 
     Loader {

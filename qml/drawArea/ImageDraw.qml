@@ -33,51 +33,6 @@ Item {
         opacity: 0.25
     }
 
-    MouseArea {
-        anchors.fill: flickable
-        acceptedButtons: Qt.NoButton
-        onWheel: {
-            var xmove = 0
-            var ymove = 0
-            var newScale = root.scale
-            console.log(wheel.angleDelta)
-            var mx = 0, my = 0
-
-            if(wheel.angleDelta.y > 2) {
-                if(root.scale == root.maxScale)
-                    return
-                newScale = root.scale * 1.1
-                mx = wheel.x
-                my = wheel.y
-            } else if (wheel.angleDelta.y < -2) {
-                if(root.scale == 1)
-                    return
-                newScale = root.scale / 1.1
-                mx = width / 2
-                my = height / 2
-            } else {
-                return
-            }
-
-            var xold = (mx + flickable.contentX)
-            var xnorm = xold / img.width
-            var yold = (my + flickable.contentY)
-            var ynorm = yold / img.height
-
-            root.scale = bounded(newScale, 1, root.maxScale)
-
-            var xnew = xnorm * img.width
-            var ynew = ynorm * img.height
-
-            xmove = xnew - xold
-            ymove = ynew - yold
-
-            flickable.contentX += xmove
-            flickable.contentY += ymove
-            flickable.returnToBounds()
-        }
-    }
-
     Flickable {
         id: flickable
         anchors.fill: parent
@@ -392,6 +347,51 @@ Item {
             }
         }
     } // Flickable
+
+    MouseArea {
+        anchors.fill: flickable
+        acceptedButtons: Qt.NoButton
+        onWheel: {
+            var xmove = 0
+            var ymove = 0
+            var newScale = root.scale
+            console.log(wheel.angleDelta)
+            var mx = 0, my = 0
+
+            if(wheel.angleDelta.y > 2) {
+                if(root.scale == root.maxScale)
+                    return
+                newScale = root.scale * 1.1
+                mx = wheel.x
+                my = wheel.y
+            } else if (wheel.angleDelta.y < -2) {
+                if(root.scale == 1)
+                    return
+                newScale = root.scale / 1.1
+                mx = width / 2
+                my = height / 2
+            } else {
+                return
+            }
+
+            var xold = (mx + flickable.contentX)
+            var xnorm = xold / img.width
+            var yold = (my + flickable.contentY)
+            var ynorm = yold / img.height
+
+            root.scale = bounded(newScale, 1, root.maxScale)
+
+            var xnew = xnorm * img.width
+            var ynew = ynorm * img.height
+
+            xmove = xnew - xold
+            ymove = ynew - yold
+
+            flickable.contentX += xmove
+            flickable.contentY += ymove
+            flickable.returnToBounds()
+        }
+    }
 
 
 
