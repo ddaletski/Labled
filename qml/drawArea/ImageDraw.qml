@@ -349,8 +349,13 @@ Item {
     } // Flickable
 
     MouseArea {
+        id: mouseAreaZoom
+
         anchors.fill: flickable
         acceptedButtons: Qt.NoButton
+
+        cursorShape: mouseArea.cursorShape
+
         onWheel: {
             var xmove = 0
             var ymove = 0
