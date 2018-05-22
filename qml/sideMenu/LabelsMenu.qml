@@ -56,6 +56,7 @@ ColumnLayout {
         id: labelsList
 
         Layout.fillHeight: true
+        Layout.fillWidth: true
         model: proxyModel(root.model, filterInput.text)
 
         orientation: ListView.Vertical
@@ -87,7 +88,7 @@ ColumnLayout {
                     Rectangle {
                         id: makeDefaultRect
                         anchors.centerIn: parent
-                        height: txt.height
+                        height: txt.height - 2
                         width: height
                         radius: height / 2
                         color: root.defaultLabel == modelData ? "gray" : "white"

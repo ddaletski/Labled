@@ -14,9 +14,7 @@ class Backend : public QObject
 {
     Q_OBJECT
 public:
-    explicit Backend(QObject *parent = nullptr);
-
-    Q_INVOKABLE void loadImages(const QString& imgPath, const QString& lblPath);
+    Q_INVOKABLE void loadImages(const QString& imgPath, const QString& lblPath, bool onlyExisting=false);
     Q_INVOKABLE QVariantMap next(int step);
     Q_INVOKABLE void save(const QVariantMap& annotation);
     Q_INVOKABLE int imagesCount();

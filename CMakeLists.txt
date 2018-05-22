@@ -18,3 +18,4 @@ file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/cpp/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES} "qml.qrc")
 
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick Qt5::Xml Qt5::Widgets)
+

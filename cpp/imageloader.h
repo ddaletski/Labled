@@ -64,7 +64,7 @@ public:
     };
 
 
-    ImagesLoader(QObject *parent = nullptr);
+    ImagesLoader();
 
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, size()); }
@@ -85,8 +85,8 @@ public:
 
     static void saveVoc(const QVariantMap& annotation);
 
-    void loadImagesVoc(const QString& imagesDir, const QString& annotationsDir);
-    void loadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile);
+    void loadImagesVoc(const QString& imagesDir, const QString& annotationsDir, bool onlyExisting=false);
+    void loadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile, bool onlyExisting=false);
 
 private:
     QVariantMap load(const QString& annotationPath);
@@ -95,6 +95,8 @@ private:
     QVector<QPair<QString, QString>> _paths;
     LabelsFormat _format;
     QVector<QString> _darknet_labels;
+
+    bool _onlyExistingAnnotations;
 };
 
 

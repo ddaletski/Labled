@@ -13,7 +13,7 @@ static T bounded(T val, T min_val, T max_val) {
 }
 
 
-ImagesLoader::ImagesLoader(QObject *parent) : QObject(parent) {
+ImagesLoader::ImagesLoader() {
     _format = LabelsFormat::NO_FORMAT;
 }
 
@@ -41,7 +41,7 @@ void ImagesLoader::setPaths(const QVector<QPair<QString, QString> >& paths) {
     _paths = paths;
 }
 
-void ImagesLoader::loadImagesVoc(const QString &imagesDir, const QString &annotationsDir) {
+void ImagesLoader::loadImagesVoc(const QString &imagesDir, const QString &annotationsDir, bool onlyExisting) {
     _format = LabelsFormat::VOC;
 
     QDir imagesDir_(imagesDir);
@@ -56,12 +56,17 @@ void ImagesLoader::loadImagesVoc(const QString &imagesDir, const QString &annota
         QFileInfo img_fileinfo(img_path);
         QString xml_path = annotationsDir_.absoluteFilePath(img_fileinfo.completeBaseName() + ".xml");
 
+        if(onlyExisting) {
+            QFileInfo xml_fileinfo(xml_path);
+            if(!xml_fileinfo.exists())
+                continue;
+        }
         _paths.push_back({img_path, xml_path});
     }
 }
 
 
-void ImagesLoader::loadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile) {
+void ImagesLoader::loadImagesDarknet(const QString& imagesDir, const QString& annotationsDir, const QString& labelsFile, bool onlyExisting) {
     _format = LabelsFormat::DARKNET;
 
     QFile labels_file(labelsFile);
@@ -87,6 +92,11 @@ void ImagesLoader::loadImagesDarknet(const QString& imagesDir, const QString& an
         QFileInfo img_fileinfo(img_path);
         QString label_path = annotationsDir_.absoluteFilePath(img_fileinfo.completeBaseName() + ".txt");
 
+        if(onlyExisting) {
+            QFileInfo label_fileinfo(label_path);
+            if(!label_fileinfo.exists())
+                continue;
+        }
         _paths.push_back({img_path, label_path});
     }
 }

@@ -11,7 +11,8 @@ DialogWindow {
     property alias outputDir: outputDirField.text
     property alias imgDir: imgDirField.text
     property alias labelsListFile: labelsListField.text
-    property var formats: ["voc", "darknet"]
+    property var inp_formats: ["voc", "darknet"]
+    property var out_formats: ["voc", "darknet"]
     property int destFormat: 1
     property int srcFormat: 0
 
@@ -97,7 +98,8 @@ DialogWindow {
                 Row {
                     id: row
                     ComboBox {
-                        model: formats
+                        id: comboBoxInput
+                        model: inp_formats
                         onCurrentIndexChanged: {
                             root.srcFormat = currentIndex
                         }
@@ -108,7 +110,8 @@ DialogWindow {
                     }
 
                     ComboBox {
-                        model: formats
+                        id: comboBoxOutput
+                        model: out_formats.filter(function(x) { return x != comboBoxInput.currentText })
                         onCurrentIndexChanged: {
                             root.destFormat = currentIndex
                         }

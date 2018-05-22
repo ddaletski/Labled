@@ -12,6 +12,7 @@ ColumnLayout {
     property alias showLabels: configMenu.showLabels
     property alias labelsSize: configMenu.labelsSize
     property alias enableLabelsShortcuts: configMenu.enableLabelsShortcuts
+    property alias validationMode: configMenu.validationMode
     property var labelsList: []
 
     signal unsavedChanges()

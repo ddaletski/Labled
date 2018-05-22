@@ -9,7 +9,7 @@ Item {
     property bool showLabels: true
     property int labelsSize: 8
     property int rectBorderWidth: 1
-    property int boxesFillMode: 0  // 0 - auto, 1 - dark, 2 - white
+    property int boxesFillMode: 0  // 0 - light, 1 - dark
 
     property var rects: []
     property var lastRect: rects[rects.length-1]
@@ -86,12 +86,9 @@ Item {
                         fillColor: {
                             switch(boxesFillMode) {
                             case 0:
-                                borderColor
-                                break
-                            case 1:
                                 "white"
                                 break
-                            case 2:
+                            case 1:
                                 "black"
                                 break
                             }
@@ -99,12 +96,9 @@ Item {
                         textBgColor: {
                             switch(boxesFillMode) {
                             case 0:
-                                Backend.subRgba(borderColor, Qt.rgba(0, 0, 0, 0.3))
-                                break
-                            case 1:
                                 Qt.rgba(1, 1, 1, 0.5)
                                 break
-                            case 2:
+                            case 1:
                                 Qt.rgba(0, 0, 0, 0.5)
                                 break
                             }
@@ -113,12 +107,9 @@ Item {
                         textColor: {
                             switch(boxesFillMode) {
                             case 0:
-                                Backend.invertColor(borderColor)
-                                break
-                            case 1:
                                 "black"
                                 break
-                            case 2:
+                            case 1:
                                 "white"
                                 break
                             }
@@ -349,7 +340,7 @@ Item {
     } // Flickable
 
     MouseArea {
-        id: mouseAreaZoom
+        id: mouseAreaWheel
 
         anchors.fill: flickable
         acceptedButtons: Qt.NoButton
@@ -360,7 +351,6 @@ Item {
             var xmove = 0
             var ymove = 0
             var newScale = root.scale
-            console.log(wheel.angleDelta)
             var mx = 0, my = 0
 
             if(wheel.angleDelta.y > 2) {

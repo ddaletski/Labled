@@ -1,16 +1,14 @@
 #include "backend.h"
 #include <QDebug>
 
-Backend::Backend(QObject *parent) : QObject(parent) {  }
-
-///////////////////////////////////
+////////////////////////////////
 /// \brief Backend::loadImages
 /// \param imgPath
 /// \param lblPath
+/// \param onlyExisting
 ///
-void Backend::loadImages(const QString &imgPath, const QString &lblPath)
-{
-   _loader.loadImagesVoc(imgPath, lblPath);
+void Backend::loadImages(const QString &imgPath, const QString &lblPath, bool onlyExisting) {
+   _loader.loadImagesVoc(imgPath, lblPath, onlyExisting);
    _iterator = _loader.begin();
    _curIdx = 0;
 }
@@ -20,8 +18,7 @@ void Backend::loadImages(const QString &imgPath, const QString &lblPath)
 /// \param step
 /// \return
 ///
-QVariantMap Backend::next(int step)
-{
+QVariantMap Backend::next(int step) {
     _curIdx = Common::bounded<int>(_curIdx + step, 0, _loader.size()-1);
     _iterator += step;
     QVariantMap res = *_iterator;

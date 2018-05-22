@@ -61,7 +61,7 @@ ApplicationWindow {
     function loadImages() {
         currentImage = ""
         imageArea.rects = []
-        Backend.loadImages(root.imagesDir, root.annotationsDir)
+        Backend.loadImages(root.imagesDir, root.annotationsDir, sideMenu.validationMode)
         imagesCount = Backend.imagesCount()
         nextImage(0)
     }
@@ -375,6 +375,7 @@ ApplicationWindow {
                     Layout.rightMargin: 10
                     labelsList: root.labelsList
 
+                    onValidationModeChanged: root.loadImages()
                     onUnsavedChanges: root.unsavedChanges = true
                     onUpdateLabels: root.updateLabels()
                     onRenameLabel: {
