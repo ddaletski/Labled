@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.2
 
 import "common"
 
-DialogWindow {
+Dialog{
     id: root
     property alias inputDir: inputDirField.text
     property alias annotationsDir: annotationsDirField.text

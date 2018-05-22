@@ -13,10 +13,11 @@ class ConvertWorker : public QObject {
 
 public slots:
     void convertDarknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath);
-
+    void convertVocToDarknet(const QString &inputDir, const QString &outputDir, const QString &labelsListPath);
 signals:
     void progressChanged(double progress);
     void convertedDarknetToVoc();
+    void convertedVocToDarknet();
 };
 
 
@@ -27,12 +28,15 @@ public:
     explicit ConvertTool(QObject *parent = nullptr);
     ~ConvertTool();
     Q_INVOKABLE void darknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath);
+    Q_INVOKABLE void vocToDarknet(const QString& inputDir, const QString& outputDir, const QString& labelListPath);
 
 signals:
     void progressChanged(double progress);
 
     void convertDarknetToVoc(const QString& inputDir, const QString& outputDir, const QString& imgDir, const QString& labelListPath);
+    void convertVocToDarknet(const QString& inputDir, const QString& outputDir, const QString& labelListPath);
     void convertedDarknetToVoc();
+    void convertedVocToDarknet();
 
 public slots:
 

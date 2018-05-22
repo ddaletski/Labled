@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QtXml>
-#include <QImage>
+#include <QImageReader>
 
 
 template <class T>
@@ -154,7 +154,7 @@ static QDomElement textTag(QDomDocument& doc, const QString& tagName, const QStr
 
 QByteArray ImagesLoader::innerToVoc(const QVariantMap& inner) {
     QString imgPath = inner["imgPath"].toString();
-    QImage img = QImage(imgPath);
+    QImageReader img(imgPath);
 
     QFileInfo img_file = QFileInfo(imgPath);
     QString dir = img_file.fileName();
@@ -170,8 +170,8 @@ QByteArray ImagesLoader::innerToVoc(const QVariantMap& inner) {
     source.appendChild(textTag(doc, "database", "unknown"));
 
     QDomElement size = tag(doc, "size");
-    size.appendChild(textTag(doc, "width", QString::number(img.width())));
-    size.appendChild(textTag(doc, "height", QString::number(img.height())));
+    size.appendChild(textTag(doc, "width", QString::number(img.size().width())));
+    size.appendChild(textTag(doc, "height", QString::number(img.size().height())));
     size.appendChild(textTag(doc, "depth", "3"));
     annotation.appendChild(size);
 
@@ -181,10 +181,10 @@ QByteArray ImagesLoader::innerToVoc(const QVariantMap& inner) {
         QVariantMap rect = _rect.toMap();
 
         QString label = rect["label"].toString();
-        QString xmin = QString::number(int(rect["x"].toDouble() * img.width()));
-        QString ymin = QString::number(int(rect["y"].toDouble() * img.height()));
-        QString xmax = QString::number(int((rect["x"].toDouble() + rect["width"].toDouble()) * img.width()));
-        QString ymax = QString::number(int((rect["y"].toDouble() + rect["height"].toDouble()) * img.height()));
+        QString xmin = QString::number(int(rect["x"].toDouble() * img.size().width()));
+        QString ymin = QString::number(int(rect["y"].toDouble() * img.size().height()));
+        QString xmax = QString::number(int((rect["x"].toDouble() + rect["width"].toDouble()) * img.size().width()));
+        QString ymax = QString::number(int((rect["y"].toDouble() + rect["height"].toDouble()) * img.size().height()));
 
         QDomElement object = tag(doc, "object");
         object.appendChild(textTag(doc, "name", label));

@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.2
 
 import "common"
 
-DialogWindow {
+Dialog {
     id: root
     property alias inputDir: inputDirField.text
     property alias outputDir: outputDirField.text
@@ -20,6 +20,10 @@ DialogWindow {
         target: ConvertToolBackend
         onProgressChanged: progressBar.value = progress
         onConvertedDarknetToVoc: {
+            progressBar.value = 0
+            completedDialog.open()
+        }
+        onConvertedVocToDarknet: {
             progressBar.value = 0
             completedDialog.open()
         }
@@ -239,7 +243,10 @@ DialogWindow {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
                 onClicked: {
-                    ConvertToolBackend.darknetToVoc(root.inputDir, root.outputDir, root.imgDir, root.labelsListFile)
+                    if(root.srcFormat == 1 && root.destFormat == 0)
+                        ConvertToolBackend.darknetToVoc(root.inputDir, root.outputDir, root.imgDir, root.labelsListFile)
+                    else
+                        ConvertToolBackend.vocToDarknet(root.inputDir, root.outputDir, root.labelsListFile)
                 }
             }
             Button {
