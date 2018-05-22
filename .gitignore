@@ -21,6 +21,8 @@ tags
 .directory
 *.debug
 Makefile*
+CMakeFiles
+*.user
 *.prl
 *.app
 moc_*.cpp
