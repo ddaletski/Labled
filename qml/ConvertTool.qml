@@ -15,6 +15,9 @@ Dialog {
     property var out_formats: ["voc", "darknet"]
     property int destFormat: 1
     property int srcFormat: 0
+    standardButtons: Qt.NoButton
+    width: mainItem.width
+    height: mainItem.height
 
     Connections {
         target: ConvertToolBackend

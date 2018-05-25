@@ -10,6 +10,10 @@ Dialog{
     property alias inputDir: inputDirField.text
     property alias annotationsDir: annotationsDirField.text
     property alias outputDir: outputDirField.text
+    standardButtons: Qt.NoButton
+    width: mainItem.width
+    height: mainItem.height
+
 
     Connections {
         target: CropToolBackend
