@@ -229,7 +229,7 @@ Dialog {
         Item {width: 1; height: 10}
 
         RowLayout {
-            anchors.right: parent.right
+            Layout.alignment: Qt.AlignRight
 
             ProgressBar {
                 id: progressBar

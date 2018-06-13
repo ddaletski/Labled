@@ -1,0 +1,6 @@
+[submodule "Simd"]
+	path = Simd
+	url = https://github.com/ermig1979/Simd.git
+[submodule "Synet"]
+	path = Synet
+	url = https://github.com/ermig1979/Synet.git

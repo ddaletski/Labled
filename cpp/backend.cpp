@@ -7,6 +7,11 @@
 /// \param lblPath
 /// \param onlyExisting
 ///
+Backend::Backend()
+{
+    _detectorLoaded = _detector.Init("model.xml", "model.bin");
+}
+
 void Backend::loadImages(const QString &imgPath, const QString &lblPath, bool onlyExisting) {
    _loader.loadImagesVoc(imgPath, lblPath, onlyExisting);
    _iterator = _loader.begin();
@@ -150,5 +155,32 @@ QColor Backend::subRgba(const QColor &color1, const QColor &color2) {
                 Common::bounded(result.blue() - color2.blue(), 0, 255),
                 Common::bounded(result.alpha() - color2.alpha(), 0, 255)
                 );
+    return result;
+}
+
+////////////////////////////////
+/// \brief Backend::detect
+/// \param imgPath
+/// \return
+///
+QVariantList Backend::detect(const QString &imgPath) {
+    if(!_detectorLoaded) {
+        std::cout << "detector not loaded" << std::endl;
+        return {};
+    }
+    QImage img(imgPath);
+    auto regions = _detector.Detect(img);
+
+    QVariantList result;
+    for(auto reg : regions) {
+        QVariantMap rect;
+        rect["x"] = reg.x / img.width();
+        rect["y"] = reg.y / img.height();
+        rect["w"] = reg.w / img.width();
+        rect["h"] = reg.h / img.height();
+
+        result.push_back(rect);
+    }
+
     return result;
 }

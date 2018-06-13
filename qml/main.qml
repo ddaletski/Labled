@@ -132,6 +132,10 @@ ApplicationWindow {
     }
 
 
+    DetectorChooseDialog {
+        id: detectorDialog
+    }
+
     LabelChooseDialog {
         id: labelDialog
         labelsList: root.labelsList
@@ -252,6 +256,20 @@ ApplicationWindow {
                     }
                 }
             }
+            MenuItem {
+                text: qsTr("Detect")
+                shortcut: "T"
+                onTriggered: {
+                    var detections = Backend.detect(currentImage)
+                    console.log(detections.length)
+                    for (var i in detections) {
+                        var r = detections[i]
+                        imageArea.rects.push( imageArea.rectItem(r.x, r.y, r.w, r.h, addLabel("detection")) )
+                    }
+                    imageArea.updateRects()
+                }
+            }
+
             MenuItem {
                 text: qsTr("Undo all changes")
                 shortcut: "Z"
