@@ -28,3 +28,14 @@ file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/cpp/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES} "qml.qrc")
 
 target_link_libraries(${PROJECT_NAME} Simd -lpthread Qt5::Core Qt5::Quick Qt5::Xml Qt5::Widgets)
+
+
+if (WIN32)
+    message("building win32 installer")
+    add_custom_target(build_installer ${CMAKE_CURRENT_SOURCE_DIR}/build_installer_win32.cmd
+        DEPENDS ${PROJECT_NAME})
+else ()
+    message("building linux installer")
+    add_custom_target(build_installer ${CMAKE_CURRENT_SOURCE_DIR}/build_installer_linux.sh
+        DEPENDS ${PROJECT_NAME})
+endif ()
