@@ -1,5 +1,6 @@
 #include "backend.h"
 #include <QDebug>
+#include <QImage>
 
 ////////////////////////////////
 /// \brief Backend::loadImages
@@ -9,13 +10,14 @@
 ///
 Backend::Backend()
 {
-    _detectorLoaded = _detector.Init("model.xml", "model.bin");
+    _detectorLoaded = _detector.Init("data/nets/detector.xml", "data/nets/detector.bin", "data/det_classes.txt");
+    _classifierLoaded = _classifier.Init("data/nets/classifier.xml", "data/nets/classifier.bin", "data/clf_classes.txt");
 }
 
 void Backend::loadImages(const QString &imgPath, const QString &lblPath, bool onlyExisting) {
-   _loader.loadImagesVoc(imgPath, lblPath, onlyExisting);
-   _iterator = _loader.begin();
-   _curIdx = 0;
+    _loader.loadImagesVoc(imgPath, lblPath, onlyExisting);
+    _iterator = _loader.begin();
+    _curIdx = 0;
 }
 
 //////////////////////////////////
@@ -106,8 +108,8 @@ QColor Backend::invertColor(const QColor &color) {
     c.setAlpha(color.alpha());
 
     double distFromCenter = Common::distance(c.redF(), 0.5) +
-                            Common::distance(c.greenF(), 0.5) +
-                            Common::distance(c.blueF(), 0.5);
+            Common::distance(c.greenF(), 0.5) +
+            Common::distance(c.blueF(), 0.5);
 
 
     if(distFromCenter < 0.1)
@@ -169,18 +171,44 @@ QVariantList Backend::detect(const QString &imgPath) {
         return {};
     }
     QImage img(imgPath);
-    auto regions = _detector.Detect(img);
 
-    QVariantList result;
-    for(auto reg : regions) {
-        QVariantMap rect;
-        rect["x"] = reg.x / img.width();
-        rect["y"] = reg.y / img.height();
-        rect["w"] = reg.w / img.width();
-        rect["h"] = reg.h / img.height();
+    try {
+        auto regions = _detector.Detect(img);
 
-        result.push_back(rect);
+        QVariantList result;
+        for(auto reg : regions) {
+            QVariantMap rect;
+            rect["x"] = reg.x / img.width();
+            rect["y"] = reg.y / img.height();
+            rect["w"] = reg.w / img.width();
+            rect["h"] = reg.h / img.height();
+            rect["label"] = reg.cls;
+
+            result.push_back(rect);
+        }
+        return result;
+
+    } catch(...) {
+        return {};
     }
-
-    return result;
 }
+
+///////////////////////////////////////
+/// \brief Backend::predict
+/// \param imgPath
+/// \param roi
+/// \return
+///
+QString Backend::classify(const QString &imgPath, float x, float y, float w, float h) {
+    if(!_detectorLoaded) {
+        std::cout << "classifier not loaded" << std::endl;
+        return "";
+    }
+    QImage img(imgPath);
+
+    QRect scaledRoi(x * img.width(), y * img.height(),
+                    w * img.width(), h * img.height());
+    img = img.copy(scaledRoi);
+    return _classifier.Classify(img);
+}
+

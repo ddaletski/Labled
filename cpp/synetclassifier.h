@@ -1,31 +1,23 @@
 #ifndef SYNET_CLASSIFIER_H
 #define SYNET_CLASSIFIER_H
 
-#include <Synet/Synet.h>
+#include "synetnetwork.h"
 #include <QtCore>
 
-class SynetClassifier {
+
+class SynetClassifier : public SynetNetwork {
 public:
-    typedef Synet::Network<float> Net;
-    virtual bool Init(const std::string& modelPath,
-                      const std::string& weightsPath,
+    virtual bool Init(const QString& modelPath,
+                      const QString& weightsPath,
+                      const QString& classesPath,
                       double thresh=0.5,
                       size_t threads=1);
 
-    virtual std::vector<size_t> Classify(const QImage& img);
-
-
-    size_t width();
-    size_t height();
-    size_t channels();
+    virtual QString Classify(const QImage& img);
 
 private:
-    Net _net;
-    size_t _channels;
-    size_t _height;
-    size_t _width;
-    double _detectionThreshold;
-    double _maxOverlap;
+    double _threshold;
+    QVector<QString> _classes;
 };
 
 

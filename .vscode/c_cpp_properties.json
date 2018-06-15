@@ -10,9 +10,9 @@
             },
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/Simd/src",
                 "/usr/include/c++/6",
                 "/usr/include/x86_64-linux-gnu/c++/6",
+                "${workspaceFolder}/Simd/src",
                 "${workspaceFolder}/Synet/src"
             ],
             "defines": [],

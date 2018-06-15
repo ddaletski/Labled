@@ -261,10 +261,9 @@ ApplicationWindow {
                 shortcut: "T"
                 onTriggered: {
                     var detections = Backend.detect(currentImage)
-                    console.log(detections.length)
                     for (var i in detections) {
                         var r = detections[i]
-                        imageArea.rects.push( imageArea.rectItem(r.x, r.y, r.w, r.h, addLabel("detection")) )
+                        imageArea.rects.push( imageArea.rectItem(r.x, r.y, r.w, r.h, addLabel(r.label)) )
                     }
                     imageArea.updateRects()
                 }
@@ -332,7 +331,16 @@ ApplicationWindow {
                     boxesFillMode: sideMenu.boxesFillMode
 
                     onRectAdded: {
-                        if(defaultLabel < 0) {
+                        if(sideMenu.autoClassify) {
+                            var r = imageArea.lastRect
+                            var lbl =  Backend.classify(root.currentImage, r.x, r.y, r.width, r.height)
+                            if(lbl != '')
+                                imageArea.updateLabel(addLabel(lbl))
+                            else  {
+                                labelDialog.label = ""
+                                labelDialog.open()
+                            }
+                        } else if(defaultLabel < 0) {
                             labelDialog.label = ""
                             labelDialog.open()
                         } else {

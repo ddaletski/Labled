@@ -1,53 +1,37 @@
 #include "synetdetector.h"
 #include <functional>
+#include <QtCore>
+#include <QFile>
 
-bool SynetDetector::Init(const std::string &modelPath,
-                         const std::string &weightsPath,
+bool SynetDetector::Init(const QString &modelPath,
+                         const QString &weightsPath,
+                         const QString &classesPath,
                          double threshold,
                          double overlap,
                          size_t threads)
 {
-    Synet::SetThreadNumber(threads);
-
-    if (_net.Load(modelPath, weightsPath)) {
-        Net::Tensor * src = _net.Src()[0];
-        _channels = src->Shape()[1];
-        _height = src->Shape()[2];
-        _width = src->Shape()[3];
-        _detectionThreshold = threshold;
-        _maxOverlap = overlap;
-        return true;
+    QFile classesFile(classesPath);
+    if (!classesFile.open(QFile::ReadOnly)) {
+        std::cerr << "can't read classes file" << std::endl;
+        return false;
     }
 
-    return false;
+    while(!classesFile.atEnd()) {
+        QString class_entry = classesFile.readLine().trimmed();
+        _classes.push_back(class_entry);
+    }
+
+    std::cout << _classes.size() << std::endl;
+
+    _detectionThreshold = threshold;
+    _maxOverlap = overlap;
+    return SynetNetwork::Init(modelPath, weightsPath, threads);
 }
 
 
-std::vector<Synet::Region<float>> SynetDetector::Detect(const QImage &img)
+std::vector<SynetDetector::Region> SynetDetector::Detect(const QImage &img)
 {
-    QImage image = img.scaled(_width, _height).convertToFormat(QImage::Format_BGR30);
-    std::vector<float> inputVector(_channels * _height * _width);
-
-    std::function<float(QRgb)> ext_color[] = {
-        [](QRgb c) { return QColor(c).blueF(); },
-        [](QRgb c) { return QColor(c).greenF(); },
-        [](QRgb c) { return QColor(c).redF(); },
-    };
-
-    for(int k = 0; k < _channels/3; ++k) {
-        for(int i = 0; i < _height; ++i) {
-            QRgb* line = (QRgb*)image.scanLine(i);
-            for(int j = 0; j < _width; ++j) {
-                inputVector[k * _width * _height + i * _width + j] = ext_color[k](line[j]);
-            }
-        }
-    }
-
-    Net::Tensor * src = _net.Src()[0];
-    std::copy(inputVector.begin(), inputVector.end(), src->CpuData());
-
-    _net.Forward();
-    Net::Tensor * dst = _net.Dst()[0];
+    Forward(img);
 
     std::vector<Synet::Region<float>> regions;
     regions = _net.GetRegions(_width, _height, _detectionThreshold, _maxOverlap);
@@ -56,9 +40,12 @@ std::vector<Synet::Region<float>> SynetDetector::Detect(const QImage &img)
     double yscale = 1.0 * img.height() / _height;
 
 
+    std::vector<Region> outRegions;
     for (size_t i = 0; i < regions.size(); i++)
     {
-        Synet::Region<float>& region = regions[i];
+        auto r = regions[i];
+        std::cout << r.id << std::endl;
+        Region region = { r.x, r.y, r.w, r.h, _classes.at(r.id), r.prob };
 
         region.x -= region.w / 2;
         region.y -= region.h / 2;
@@ -81,22 +68,9 @@ std::vector<Synet::Region<float>> SynetDetector::Detect(const QImage &img)
         region.x *= xscale;
         region.h *= yscale;
         region.w *= xscale;
+
+        outRegions.push_back(region);
     }
 
-    return regions;
-}
-
-size_t SynetDetector::width()
-{
-    return _width;
-}
-
-size_t SynetDetector::height()
-{
-    return _height;
-}
-
-size_t SynetDetector::channels()
-{
-    return _channels;
+    return outRegions;
 }

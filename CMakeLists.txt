@@ -38,3 +38,8 @@ else ()
     add_custom_target(build_installer ${CMAKE_CURRENT_SOURCE_DIR}/build_installer_linux.sh
         DEPENDS ${PROJECT_NAME})
 endif ()
+
+add_custom_target(copyData ALL
+    COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Copying data"
+)
