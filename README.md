@@ -1,2 +1,2 @@
-# Lable
+# Labled
 Image labeling tool
