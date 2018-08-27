@@ -23,6 +23,5 @@
         <file>qml/main.qml</file>
         <file>qml/common/DialogWindow.qml</file>
         <file>img/color_palette.svg</file>
-        <file>qml/sideMenu/DetectorChooseDialog.qml</file>
     </qresource>
 </RCC>

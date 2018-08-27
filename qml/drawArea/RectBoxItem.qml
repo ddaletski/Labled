@@ -13,10 +13,10 @@ Item {
     property color textBgColor: "white"
     property color textColor: "black"
 
-
     property double fillOpacity: 0.2
     property double borderOpacity: 1
     property int borderWidth: 1
+    property bool underlined: false
 
     property alias _width: borderRect.width
     property alias _height: borderRect.height
@@ -75,5 +75,6 @@ Item {
         color: root.textColor
         font.bold: false
         font.pixelSize: root.textSize
+        font.underline: root.underlined
     }
 }

@@ -71,6 +71,7 @@ DialogWindow {
                     var idx = event.key - Qt.Key_1
                     if(root.labelsList.length > idx) {
                         label = labelsList[idx].name
+                        buttonOk.focus = true
                     }
                 }
             }
@@ -99,12 +100,14 @@ DialogWindow {
             spacing: 5
 
             Button {
+                id: buttonOk
                 text: qsTr("Ok")
                 onClicked: {
                     root.accept()
                 }
             }
             Button {
+                id: buttonCansel
                 text: qsTr("Cancel")
                 onClicked: {
                     root.reject()

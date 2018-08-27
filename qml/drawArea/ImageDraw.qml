@@ -81,6 +81,7 @@ Item {
                             var w = root.rectBorderWidth
                             index == root.rects.length - 1 ? w + 1 : w
                         }
+                        underlined: index == root.rects.length - 1
                         fillOpacity: 0.2
 
                         fillColor: {
@@ -340,7 +341,7 @@ Item {
     } // Flickable
 
     MouseArea {
-        id: mouseAreaWheel
+        id: mouseAreaZoom
 
         anchors.fill: flickable
         acceptedButtons: Qt.NoButton

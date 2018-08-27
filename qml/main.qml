@@ -132,10 +132,6 @@ ApplicationWindow {
     }
 
 
-    DetectorChooseDialog {
-        id: detectorDialog
-    }
-
     LabelChooseDialog {
         id: labelDialog
         labelsList: root.labelsList

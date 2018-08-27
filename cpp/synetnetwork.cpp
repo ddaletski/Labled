@@ -1,6 +1,7 @@
 #include "synetnetwork.h"
 #include <QImage>
 #include <QtCore>
+#include <QColor>
 
 bool SynetNetwork::Init(const QString &modelPath, const QString &weightsPath, size_t threads)
 {
