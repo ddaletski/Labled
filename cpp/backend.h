@@ -6,8 +6,6 @@
 #include <QColor>
 #include "imageloader.h"
 #include <memory>
-#include "synetdetector.h"
-#include "synetclassifier.h"
 
 ////////////////////////////
 /// \brief The Backend class
@@ -29,15 +27,7 @@ public:
     Q_INVOKABLE QColor addRgba(const QColor& color1, const QColor& color2);
     Q_INVOKABLE QColor subRgba(const QColor& color1, const QColor& color2);
 
-    Q_INVOKABLE QVariantList detect(const QString& imgPath);
-    Q_INVOKABLE QString classify(const QString& imgPath, float x, float y, float w, float h);
-
 private:
-    SynetDetector _detector;
-    SynetClassifier _classifier;
-
-    bool _detectorLoaded;
-    bool _classifierLoaded;
     ImagesLoader _loader;
     ImagesLoader::iterator _iterator;
     int _curIdx;

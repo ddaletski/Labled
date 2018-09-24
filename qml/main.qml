@@ -252,18 +252,6 @@ ApplicationWindow {
                     }
                 }
             }
-            MenuItem {
-                text: qsTr("Detect")
-                shortcut: "T"
-                onTriggered: {
-                    var detections = Backend.detect(currentImage)
-                    for (var i in detections) {
-                        var r = detections[i]
-                        imageArea.rects.push( imageArea.rectItem(r.x, r.y, r.w, r.h, addLabel(r.label)) )
-                    }
-                    imageArea.updateRects()
-                }
-            }
 
             MenuItem {
                 text: qsTr("Undo all changes")
@@ -327,16 +315,7 @@ ApplicationWindow {
                     boxesFillMode: sideMenu.boxesFillMode
 
                     onRectAdded: {
-                        if(sideMenu.autoClassify) {
-                            var r = imageArea.lastRect
-                            var lbl =  Backend.classify(root.currentImage, r.x, r.y, r.width, r.height)
-                            if(lbl != '')
-                                imageArea.updateLabel(addLabel(lbl))
-                            else  {
-                                labelDialog.label = ""
-                                labelDialog.open()
-                            }
-                        } else if(defaultLabel < 0) {
+                        if(defaultLabel < 0) {
                             labelDialog.label = ""
                             labelDialog.open()
                         } else {

@@ -11,7 +11,6 @@ GridLayout {
     property alias labelsSize: labelsTextSizeSlider.value
     property alias enableLabelsShortcuts: enableLabelsShotcutsSwitch.checked
     property alias validationMode: validationModeSwitch.checked
-    property alias autoClassify: autoClfSwitch.checked
 
     columns: 2
 
@@ -53,17 +52,6 @@ GridLayout {
 
     Switch {
         id: showLabelsSwitch
-        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-
-        checked: true
-    }
-
-    Label {
-        text: qsTr("Auto classification")
-    }
-
-    Switch {
-        id: autoClfSwitch
         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
         checked: true
