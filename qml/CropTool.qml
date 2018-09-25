@@ -191,7 +191,7 @@ Dialog{
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: qsTr("Run")
                 onClicked: {
-                    CropToolBackend.Crop(root.inputDir, root.annotationsDir, root.outputDir, templateField.text)
+                    CropToolBackend.crop(root.inputDir, root.annotationsDir, root.outputDir, templateField.text)
                 }
             }
             Button {
